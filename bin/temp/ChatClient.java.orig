@@ -24,19 +24,26 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     private static final long serialVersionUID = 1L;
     private JList<String> onlineUserList;
     private DefaultListModel<String> OnlineUserListModel;
-
-
+    private ListeningPortPrivate lpp;
+    static final int MAXIMUM = 100;
+    static final int MINIMUM = 0;
     private JButton searchBtn;
     private JTextField searchField;
 
-    
+
     private JList<String> searchResultlist;
     private DefaultListModel<String> listModelSearches;
 
     private JList<String> myFilesList;
     private DefaultListModel<String> myFilesListModel;
 
+    private JButton pauseBtn;
+    private JButton resumeBtn;
+    private JProgressBar downloadbar;
+    private Receiver rxThread;
+    private JProgressBar uploadbar;
 
+    private int progress = 0 ;
     private String screenName;
     private JButton whisperBtn;
 
@@ -48,8 +55,10 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     private Socket socket;
     private Container content;
 
-    private String hostName;
+    private String serverIP;
     private String port;
+    private String myIP;
+    private int myport;
     private ObjectInputStream sInput;
     private ObjectOutputStream sOutput;
     private boolean InChatRoom = false;
@@ -57,12 +66,14 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     private boolean successConnect = false;
     @SuppressWarnings("unchecked")
     public ChatClient() {
-        this.hostName = "lol";
+        this.serverIP = "lol";
         this.screenName = "";
         JTextField hostNameField = new JTextField(5);
         JTextField portField = new JTextField(5);
         JTextField userNameField = new JTextField(5);
+        JTextField myIPField = new JTextField(5);
         hostNameField.setText("localhost");
+        myIPField.setText("localhost");
         portField.setText("4444");
         String[] testname = new String[20];
         testname[0] = "mike";
@@ -89,6 +100,8 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         Random ran = new Random();
         userNameField.setText(testname[ran.nextInt(testname.length)]);
         JPanel myPanel = new JPanel();
+        myPanel.add(new JLabel("myIP:"));
+        myPanel.add(myIPField);
         myPanel.add(new JLabel("hostname:"));
         myPanel.add(hostNameField);
         myPanel.add(Box.createHorizontalStrut(15)); // a spacer
@@ -96,22 +109,23 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         myPanel.add(portField);
         myPanel.add(new JLabel("username:"));
         myPanel.add(userNameField);
-
+        myport = (int)(Math.random()*9000)+1000;
         int result = JOptionPane.showConfirmDialog(null, myPanel,
                      "Please enter host address and username", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
             this.screenName =  userNameField.getText();
-            this.hostName = hostNameField.getText();
+            this.serverIP = hostNameField.getText();
             this.port = portField.getText();
+            this.myIP = myIPField.getText();
         } else {
             System.exit(1);
         }
         boolean success = false;
         while(!success) {
             try {
-                socket = new Socket(this.hostName, Integer.parseInt(this.port));
+                socket = new Socket(this.serverIP, Integer.parseInt(this.port));
                 sOutput = new ObjectOutputStream(socket.getOutputStream());
-                sOutput.writeObject(this.screenName);
+                sOutput.writeObject(this.screenName +"+"+ myIP +":"+myport);
                 sInput  = new ObjectInputStream(socket.getInputStream());
                 ChatMessage s_msg= (ChatMessage) sInput.readObject();
                 if(s_msg.getType() == ChatMessage.SUCCESS) {
@@ -125,7 +139,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                                                            "Username taken : Please enter Host address and username", JOptionPane.OK_CANCEL_OPTION);
                     if (result == JOptionPane.OK_OPTION) {
                         this.screenName =  userNameField.getText();
-                        this.hostName = hostNameField.getText();
+                        this.serverIP = hostNameField.getText();
                         this.port = portField.getText();
                     } else {
                         System.exit(1);
@@ -141,13 +155,21 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                     System.out.println("x value: " + hostNameField.getText());
                     System.out.println("y value: " + userNameField.getText());
                     this.screenName =  userNameField.getText();
-                    this.hostName = hostNameField.getText();
+                    this.serverIP = hostNameField.getText();
                     this.port = portField.getText();
                 } else {
                     System.exit(1);
                 }
             }
         }
+    }
+
+    public int getMyport() {
+        return myport;
+    }
+
+    public String getMyIP() {
+        return myIP;
     }
 
 
@@ -166,6 +188,11 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         }
     }
 
+    public void startRxThread() {
+        rxThread = new Receiver(myIP, myport);
+        rxThread.start();
+    }
+
     public void displayGUI() {
 
         addWindowListener(
@@ -174,6 +201,39 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
             }
         }
         );
+
+
+        downloadbar = new JProgressBar();
+        downloadbar.setMinimum(MINIMUM);
+        downloadbar.setMaximum(MAXIMUM);
+
+        uploadbar = new JProgressBar();
+        uploadbar.setMinimum(MINIMUM);
+        uploadbar.setMaximum(MAXIMUM);
+        // add to JPanel
+
+        resumeBtn = new JButton("resume");
+        resumeBtn.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO Auto-generated method stub
+                //rxThread.setPauseDL(false);
+                System.out.println("resume pressed");
+                // rxThread.informSender("resume");
+            }
+        });
+        pauseBtn = new JButton("pause");
+        pauseBtn.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                // TODO Auto-generated method stub
+                //rxThread.setPauseDL(true);
+                //rxThread.informSender("pause");
+                System.out.println("pause pressed");
+            }
+        });
 
 
 
@@ -188,32 +248,26 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         myFilesList.setVisibleRowCount(5);
         myFilesList.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
-               	
-           	 JList list = (JList)evt.getSource();
+
+                JList list = (JList)evt.getSource();
                 if (evt.getClickCount() == 1) {
 
                     // Double-click detected
-               	 int index = list.locationToIndex(evt.getPoint());
+                    int index = list.locationToIndex(evt.getPoint());
 
 
                     String name = (String) myFilesListModel.getElementAt(index);
                     System.out.println(name);
-               	 
+
                 }
-            	
+
             }
 
         });
 
         JScrollPane myFileScrollPane = new JScrollPane(myFilesList);
-
-
-
-
-
-
         listModelSearches = new DefaultListModel();
-        JPanel voiceNotes = new JPanel(new BorderLayout());
+        JPanel searchPanel = new JPanel(new BorderLayout());
         //Create the list and put it in a scroll pane.
         searchResultlist= new JList(listModelSearches);
         searchResultlist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -222,21 +276,21 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         searchResultlist.setVisibleRowCount(5);
         searchResultlist.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
-            	
-            	 JList list = (JList)evt.getSource();
-                 if (evt.getClickCount() == 1) {
 
-                     // Double-click detected
-                	 int index = list.locationToIndex(evt.getPoint());
-                     String name = (String) listModelSearches.getElementAt(index);
-                     System.out.println(name);
-                	 
-                 }
+                JList list = (JList)evt.getSource();
+                if (evt.getClickCount() == 1) {
+
+                    // Double-click detected
+                    int index = list.locationToIndex(evt.getPoint());
+                    String name = (String) listModelSearches.getElementAt(index);
+                    System.out.println(name);
+
+                }
             }
 
         });
 
-        JScrollPane voicelistScrollPane = new JScrollPane(searchResultlist);
+        JScrollPane searchfilesScrollPane = new JScrollPane(searchResultlist);
 
         OnlineUserListModel = new DefaultListModel();
 
@@ -278,7 +332,24 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         JPanel lowerPane = new JPanel();
         lowerPane.setLayout(new GridLayout(1, 2));
         JPanel progressPane = new JPanel();
-        progressPane.add(new JLabel("Progress:"));
+        progressPane.add(Box.createVerticalStrut(5));
+        progressPane.add(new JLabel("Progress Information:"));
+        progressPane.add(pauseBtn);
+        progressPane.add(Box.createVerticalStrut(5));
+        progressPane.add(resumeBtn);
+        progressPane.add(Box.createVerticalStrut(5));
+        progressPane.add(new JLabel("Download progress"));
+        progressPane.add(Box.createVerticalStrut(5));
+        progressPane.add(downloadbar);
+        progressPane.add(Box.createVerticalStrut(5));
+        progressPane.add(new JLabel("Upload progress"));
+        progressPane.add(Box.createVerticalStrut(5));
+        progressPane.add(uploadbar);
+        progressPane.add(Box.createVerticalStrut(5));
+
+        progressPane.setLayout(new BoxLayout(progressPane,BoxLayout.Y_AXIS));
+
+
         JPanel shareFilePane = new JPanel();
         shareFilePane.add(myFileScrollPane);
         JButton chooseFile = new JButton("Choose File");
@@ -333,9 +404,9 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         OnlineUsers.add(listScrollPane, BorderLayout.CENTER);
         OnlineUsers.add(buttonPane, BorderLayout.PAGE_END);
 
-        voiceNotes.add(voicelistScrollPane,BorderLayout.CENTER);
+        searchPanel.add(searchfilesScrollPane,BorderLayout.CENTER);
 
-        voiceNotes.add(searchPane, BorderLayout.PAGE_END);
+        searchPanel.add(searchPane, BorderLayout.PAGE_END);
 
 
         textArea.setEditable(false);
@@ -344,11 +415,15 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         typedText.addActionListener(this);
 
         Container content = getContentPane();
+
         content.add(new JScrollPane(textArea), BorderLayout.CENTER);
         content.add(OnlineUsers, BorderLayout.EAST);
-        content.add(typedText, BorderLayout.SOUTH);
+        JPanel chatbar = new JPanel();
+        chatbar.add(typedText);
+        //content.add(chatbar);
+        // content.add(typedText, BorderLayout.AFTER_LAST_LINE);
         content.add(lowerPane, BorderLayout.PAGE_END);
-        content.add(voiceNotes, BorderLayout.WEST);
+        content.add(searchPanel, BorderLayout.WEST);
         this.successConnect = true;
         // display the window, with focus on typing box
         setTitle("Chat Room: " + screenName );
@@ -380,7 +455,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
 
     // listen to socket and print everything that server broadcasts
-    public void listen() {
+    public void listen() throws InterruptedException {
         ChatMessage s;
         while(true) {
 
@@ -398,6 +473,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                         OnlineUserListModel.removeAllElements();
                         String[] onlineUsers = s.getUserList();
                         for(int i = 0; i < onlineUsers.length; i++) {
+                            Thread.sleep(50);
                             OnlineUserListModel.insertElementAt(onlineUsers[i], 0);
                         }
                         break;
@@ -435,11 +511,16 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException, IOException {
         ChatClient client = new ChatClient();
+        client.startRxThread();
+
+        //client.listenForPrivateCalls();
         client.listen();
     }
 
+
+ 
 
     class WhisperListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {

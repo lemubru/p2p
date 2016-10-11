@@ -22,12 +22,13 @@ public class Receiver extends Thread {
     private ObjectOutputStream sOutput;
     private String sourceFilePath;
 
-
+    private String myIP;
+    private int myport;
     private String destinationPathUDP = "/home/frank/Dropbox/WorkSpace_ONCLOUD/RBUDP/dest/";
     private String destinationPathTCP = "destTCP/";
     static boolean losspacket = false;
 
-    public Receiver() {
+    public Receiver(String ip, int port) {
     }
 
     public void setPauseDL(boolean pauseDL) {
@@ -93,19 +94,23 @@ public class Receiver extends Thread {
         int packetSize = 0;
         int numPackets = 0;
 
-        serverSocket = new ServerSocket(4445);
-        clientSocket = serverSocket.accept();
-        System.err.println("Created socket with client");
-        sInput  = new ObjectInputStream(clientSocket.getInputStream());
-        sOutput = new ObjectOutputStream(clientSocket.getOutputStream());
+        while(true) {
+
+            serverSocket = new ServerSocket(8000);
+            System.out.println("waiting for files");
+            clientSocket = serverSocket.accept();
+            System.err.println("Created socket with client");
+            sInput  = new ObjectInputStream(clientSocket.getInputStream());
+            sOutput = new ObjectOutputStream(clientSocket.getOutputStream());
 
 
-        sourceFilePath = (String) sInput.readObject();
-        //  Stopwatch timer2 = new Stopwatch();
-        rxWithTCP();
+            sourceFilePath = (String) sInput.readObject();
+            //  Stopwatch timer2 = new Stopwatch();
+            rxWithTCP();
+        }
 
 
-        System.exit(0);
+        //System.exit(0);
     }
 
 
@@ -132,7 +137,7 @@ public class Receiver extends Thread {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        new Receiver().run();
+        new Receiver("localhost",4354).run();
 
     }
 
