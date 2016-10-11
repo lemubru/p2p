@@ -10,7 +10,7 @@ public class Sender extends Thread {
     static final int TCP = 3,  UDP = 4;
     private DatagramSocket socket = null;
     private Socket TCPsocket = null;
-
+ 
     private String sourceFilePath = "/home/frank/Dropbox/WorkSpace_ONCLOUD/RBUDP/files/Proj2.pdf";
     private String destinationPath = "/home/student/17020247/workspace/RBUDP/dest/";
     private String hostName = "localhost";

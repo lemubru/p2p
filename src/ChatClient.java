@@ -22,8 +22,21 @@ import java.util.Random;
 public class ChatClient extends JFrame implements ActionListener,ListSelectionListener  {
 
     private static final long serialVersionUID = 1L;
-    private JList<String> list;
-    private DefaultListModel<String> listModel;
+    private JList<String> onlineUserList;
+    private DefaultListModel<String> OnlineUserListModel;
+
+
+    private JButton searchBtn;
+    private JTextField searchField;
+
+
+    private JList<String> searchResultlist;
+    private DefaultListModel<String> listModelSearches;
+
+    private JList<String> myFilesList;
+    private DefaultListModel<String> myFilesListModel;
+
+
     private String screenName;
     private JButton whisperBtn;
 
@@ -138,6 +151,21 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     }
 
 
+    public void showChooser() {
+        JFileChooser chooser = new JFileChooser();
+        //FileNameExtensionFilter filter = new FileNameExtensionFilter(
+        //   "JPG & GIF Images", "jpg", "gif");
+        // chooser.setFileFilter(filter);
+        int returnVal = chooser.showOpenDialog(this);
+        if(returnVal == JFileChooser.APPROVE_OPTION) {
+            System.out.println("You chose to open this file: " +
+                               chooser.getSelectedFile().getName());
+            File file = chooser.getSelectedFile();
+            System.out.println(file.getAbsolutePath());
+
+        }
+    }
+
     public void displayGUI() {
 
         addWindowListener(
@@ -147,18 +175,81 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         }
         );
 
-        listModel = new DefaultListModel();
+
+
+        myFilesListModel = new DefaultListModel();
+
+
+        //Create the list and put it in a scroll pane.
+        myFilesList= new JList(myFilesListModel);
+        myFilesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        myFilesList.setSelectedIndex(0);
+        myFilesList.addListSelectionListener((ListSelectionListener) this);
+        myFilesList.setVisibleRowCount(5);
+        myFilesList.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+
+                JList list = (JList)evt.getSource();
+                if (evt.getClickCount() == 1) {
+
+                    // Double-click detected
+                    int index = list.locationToIndex(evt.getPoint());
+
+
+                    String name = (String) myFilesListModel.getElementAt(index);
+                    System.out.println(name);
+
+                }
+
+            }
+
+        });
+
+        JScrollPane myFileScrollPane = new JScrollPane(myFilesList);
+
+
+
+
+
+
+        listModelSearches = new DefaultListModel();
+        JPanel voiceNotes = new JPanel(new BorderLayout());
+        //Create the list and put it in a scroll pane.
+        searchResultlist= new JList(listModelSearches);
+        searchResultlist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        searchResultlist.setSelectedIndex(0);
+        searchResultlist.addListSelectionListener((ListSelectionListener) this);
+        searchResultlist.setVisibleRowCount(5);
+        searchResultlist.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+
+                JList list = (JList)evt.getSource();
+                if (evt.getClickCount() == 1) {
+
+                    // Double-click detected
+                    int index = list.locationToIndex(evt.getPoint());
+                    String name = (String) listModelSearches.getElementAt(index);
+                    System.out.println(name);
+
+                }
+            }
+
+        });
+
+        JScrollPane voicelistScrollPane = new JScrollPane(searchResultlist);
+
+        OnlineUserListModel = new DefaultListModel();
 
         JPanel OnlineUsers = new JPanel(new BorderLayout());
         //Create the list and put it in a scroll pane.
-        list = new JList(listModel);
-        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        list.setSelectedIndex(0);
-        list.addListSelectionListener((ListSelectionListener) this);
-        list.setVisibleRowCount(5);
+        onlineUserList = new JList(OnlineUserListModel);
+        onlineUserList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        onlineUserList.setSelectedIndex(0);
+        onlineUserList.addListSelectionListener((ListSelectionListener) this);
+        onlineUserList.setVisibleRowCount(5);
 
 
-        list.addMouseListener(new MouseAdapter() {
+        onlineUserList.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
                 JList list = (JList)evt.getSource();
                 if (evt.getClickCount() == 2) {
@@ -167,7 +258,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                     int index = list.locationToIndex(evt.getPoint());
 
 
-                    String name = (String) listModel.getElementAt(index);
+                    String name = (String) OnlineUserListModel.getElementAt(index);
                     System.out.println(name);
                     typedText.setText("@"+name+" ");
 
@@ -180,7 +271,56 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
             }
         });
 
-        JScrollPane listScrollPane = new JScrollPane(list);
+
+
+
+        JPanel searchPane = new JPanel();
+        JPanel lowerPane = new JPanel();
+        lowerPane.setLayout(new GridLayout(1, 2));
+        JPanel progressPane = new JPanel();
+        progressPane.add(new JLabel("Progress:"));
+        JPanel shareFilePane = new JPanel();
+        shareFilePane.add(myFileScrollPane);
+        JButton chooseFile = new JButton("Choose File");
+        chooseFile.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO Auto-generated method stub
+                showChooser();
+            }
+        });
+        shareFilePane.add(chooseFile);
+        // shareFilePane.add(chooser);
+
+        shareFilePane.add(new JLabel("Share files"));
+
+
+
+        lowerPane.add(progressPane, BorderLayout.WEST);
+        lowerPane.add(shareFilePane);
+
+        searchPane.setLayout(new BoxLayout(searchPane,BoxLayout.LINE_AXIS));
+
+        searchBtn = new JButton("Search");
+
+        searchBtn.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO Auto-generated method stub
+
+            }
+        });
+
+        searchField = new JTextField();
+
+
+        searchPane.add(searchField);
+        searchPane.add(searchBtn);
+
+
+        JScrollPane listScrollPane = new JScrollPane(onlineUserList);
 
 
         JPanel buttonPane = new JPanel();
@@ -193,6 +333,10 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         OnlineUsers.add(listScrollPane, BorderLayout.CENTER);
         OnlineUsers.add(buttonPane, BorderLayout.PAGE_END);
 
+        voiceNotes.add(voicelistScrollPane,BorderLayout.CENTER);
+
+        voiceNotes.add(searchPane, BorderLayout.PAGE_END);
+
 
         textArea.setEditable(false);
         textArea.setBackground(new Color(182, 208, 217));
@@ -203,6 +347,8 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         content.add(new JScrollPane(textArea), BorderLayout.CENTER);
         content.add(OnlineUsers, BorderLayout.EAST);
         content.add(typedText, BorderLayout.SOUTH);
+        content.add(lowerPane, BorderLayout.PAGE_END);
+        content.add(voiceNotes, BorderLayout.WEST);
         this.successConnect = true;
         // display the window, with focus on typing box
         setTitle("Chat Room: " + screenName );
@@ -249,10 +395,10 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                         textArea.setCaretPosition(textArea.getText().length());
                         break;
                     case ChatMessage.USERSONLINE:
-                        listModel.removeAllElements();
+                        OnlineUserListModel.removeAllElements();
                         String[] onlineUsers = s.getUserList();
                         for(int i = 0; i < onlineUsers.length; i++) {
-                            listModel.insertElementAt(onlineUsers[i], 0);
+                            OnlineUserListModel.insertElementAt(onlineUsers[i], 0);
                         }
                         break;
                     default:
@@ -297,26 +443,26 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
     class WhisperListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            int index = list.getSelectedIndex();
-            String name = (String) listModel.getElementAt(index);
+            int index = onlineUserList.getSelectedIndex();
+            String name = (String) OnlineUserListModel.getElementAt(index);
             System.out.println(name);
             typedText.setText("@"+name+" ");
             typedText.requestFocusInWindow();
             //  listModel.remove(index);
 
-            int size = listModel.getSize();
+            int size = OnlineUserListModel.getSize();
 
             if (size == 0) { //Nobody's left, disable firing.
                 whisperBtn.setEnabled(false);
 
             } else { //Select an index.
-                if (index == listModel.getSize()) {
+                if (index == OnlineUserListModel.getSize()) {
                     //removed item in last position
                     index--;
                 }
 
-                list.setSelectedIndex(index);
-                list.ensureIndexIsVisible(index);
+                onlineUserList.setSelectedIndex(index);
+                onlineUserList.ensureIndexIsVisible(index);
             }
         }
     }

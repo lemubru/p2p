@@ -31,7 +31,7 @@ public class RxGUI extends JPanel {
         pbar.setMinimum(MINIMUM);
         pbar.setMaximum(MAXIMUM);
         // add to JPanel
-
+        
         resumeBtn = new JButton("resume");
         resumeBtn.addActionListener(new ActionListener() {
 
@@ -120,7 +120,7 @@ public class RxGUI extends JPanel {
                     it.updateBar(percentage);
                 }
                 it.getFile().setText(it.getRxObject().getGetFileName());
-                //  it.getTp().setText(""+ rounding( (((it.getRxObject().getPs()*rxp)/it.getRxObject().getTimerUDP().elapsedTime()) / 1000000), 2 ));
+              //  it.getTp().setText(""+ rounding( (((it.getRxObject().getPs()*rxp)/it.getRxObject().getTimerUDP().elapsedTime()) / 1000000), 2 ));
                 rxp = it.getRxObject().getRxPackets();
             }
         }
