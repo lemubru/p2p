@@ -29,8 +29,8 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     static final int MINIMUM = 0;
     private JButton searchBtn;
     private JTextField searchField;
-
-
+    private File file;
+    private Sender sender;
     private JList<String> searchResultlist;
     private DefaultListModel<String> listModelSearches;
 
@@ -39,6 +39,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
     private JButton pauseBtn;
     private JButton resumeBtn;
+    private JButton downloadBtn;
     private JProgressBar downloadbar;
     private Receiver rxThread;
     private JProgressBar uploadbar;
@@ -182,10 +183,17 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         if(returnVal == JFileChooser.APPROVE_OPTION) {
             System.out.println("You chose to open this file: " +
                                chooser.getSelectedFile().getName());
-            File file = chooser.getSelectedFile();
+            file = chooser.getSelectedFile();
             System.out.println(file.getAbsolutePath());
+            displayOnScreen(file.getAbsolutePath());
 
         }
+    }
+
+    public void displayOnScreen(String s) {
+        textArea.insert(s + "\n", textArea.getText().length());
+        textArea.setCaretPosition(textArea.getText().length());
+
     }
 
     public void startRxThread() {
@@ -351,8 +359,10 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
 
         JPanel shareFilePane = new JPanel();
-        shareFilePane.add(myFileScrollPane);
+        shareFilePane.setLayout(new BoxLayout(shareFilePane,BoxLayout.Y_AXIS));
         JButton chooseFile = new JButton("Choose File");
+        shareFilePane.add(new JLabel("Share your files:"));
+        shareFilePane.add(chooseFile);
         chooseFile.addActionListener(new ActionListener() {
 
             @Override
@@ -361,17 +371,34 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                 showChooser();
             }
         });
-        shareFilePane.add(chooseFile);
         // shareFilePane.add(chooser);
 
-        shareFilePane.add(new JLabel("Share files"));
+        shareFilePane.add(myFileScrollPane);
 
 
 
         lowerPane.add(progressPane, BorderLayout.WEST);
+        // lowerPane.add(typedText);
+        //lowerPane.add(Box.createHorizontalStrut(5));
         lowerPane.add(shareFilePane);
 
         searchPane.setLayout(new BoxLayout(searchPane,BoxLayout.LINE_AXIS));
+
+        downloadBtn = new JButton("Download");
+        downloadBtn.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                if (evt.getClickCount() == 1) {
+                    System.out.println("sending with TCP");
+                    //sender.start();
+                    if(typedText.getText().startsWith("@")) {
+
+                        sendMessage(new ChatMessage(ChatMessage.DOWNLOADREQUEST,typedText.getText()));
+                        typedText.setText("");
+                        typedText.requestFocusInWindow();
+                    }
+                }
+            }
+        });
 
         searchBtn = new JButton("Search");
 
@@ -389,6 +416,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
         searchPane.add(searchField);
         searchPane.add(searchBtn);
+        searchPane.add(downloadBtn);
 
 
         JScrollPane listScrollPane = new JScrollPane(onlineUserList);
@@ -399,6 +427,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                                            BoxLayout.LINE_AXIS));
         whisperBtn = new JButton("Whisper");
         whisperBtn.addActionListener(new WhisperListener());
+        buttonPane.add(typedText);
         buttonPane.add(whisperBtn);
 
         OnlineUsers.add(listScrollPane, BorderLayout.CENTER);
@@ -419,7 +448,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         content.add(new JScrollPane(textArea), BorderLayout.CENTER);
         content.add(OnlineUsers, BorderLayout.EAST);
         JPanel chatbar = new JPanel();
-        chatbar.add(typedText);
+        //chatbar.add(typedText);
         //content.add(chatbar);
         // content.add(typedText, BorderLayout.AFTER_LAST_LINE);
         content.add(lowerPane, BorderLayout.PAGE_END);
@@ -468,6 +497,23 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                     case ChatMessage.MESSAGE:
                         textArea.insert(s.getMessage() + "\n", textArea.getText().length());
                         textArea.setCaretPosition(textArea.getText().length());
+                        break;
+                    case ChatMessage.DOWNLOADREQUEST:
+                        textArea.insert(s.getMessage() + "\n", textArea.getText().length());
+                        textArea.setCaretPosition(textArea.getText().length());
+                        int reqport = Integer.parseInt(s.getMessage().substring(s.getMessage().indexOf(">")+1,s.getMessage().length()));
+                        System.out.println(reqport);
+                        if (file != null) {
+                            try {
+                                sender = new Sender(file, reqport);
+                                sender.start();
+                            } catch (IOException e1) {
+                                // TODO Auto-generated catch block
+                                e1.printStackTrace();
+                            }
+                        } else {
+                            displayOnScreen("no files");
+                        }
                         break;
                     case ChatMessage.USERSONLINE:
                         OnlineUserListModel.removeAllElements();
@@ -518,9 +564,6 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         //client.listenForPrivateCalls();
         client.listen();
     }
-
-
-
 
     class WhisperListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {

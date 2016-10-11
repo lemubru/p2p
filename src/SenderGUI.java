@@ -51,7 +51,7 @@ public class SenderGUI extends JFrame implements ActionListener {
                 udp = false;
                 transMissionProtocol = Sender.TCP;
                 try {
-                    sender = new Sender(file, transMissionProtocol,bs, ps, plp);
+                    sender = new Sender(file,3454);
                 } catch (IOException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();

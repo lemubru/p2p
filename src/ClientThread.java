@@ -8,16 +8,27 @@ public class ClientThread  extends Thread {
     private ObjectOutputStream sOutput;     // to
     private ChatMessage chatMsg;
     private String screenName;
+    private int myport;
+    private String myIP;
 
-    public ClientThread(Socket insocket, String screenName,ObjectInputStream sInput, ObjectOutputStream sOutput) throws ClassNotFoundException, IOException {
+    public ClientThread(Socket insocket, String screenName,ObjectInputStream sInput, ObjectOutputStream sOutput, String ip, int port) throws ClassNotFoundException, IOException {
         this.screenName = screenName;
         this.sOutput = sOutput;
         this.sInput  = sInput;
         this.socket = insocket;
+        this.myIP = ip;
+        this.myport = port;
     }
 
     public String getScreenName() {
         return screenName;
+    }
+
+    public String getMyIP() {
+        return myIP;
+    }
+    public int getMyport() {
+        return myport;
     }
     /**
      * This method send a ChatMessage Object to the server

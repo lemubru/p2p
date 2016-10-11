@@ -23,19 +23,18 @@ public class Sender extends Thread {
     File file;
     private int packet_loss_prob;
     private int seqSize = 0;
+    private int sendport = 0;
     private boolean showpause = false;
-    public Sender(File file, int transmission, int sS, int ps, int plp) throws IOException {
-        this.packet_loss_prob = plp;
+    public Sender(File file, int port) throws IOException {
         this.file = file;
-        this.packetSize = ps;
+        sendport = port;
         sourceFilePath = this.file.getAbsolutePath();
-        this.transMissionProtocol = transmission;
-        this.seqSize = sS;
-        TCPsocket = new Socket(hostName,4445);
+
+        TCPsocket = new Socket(hostName,port);
         sOutput = new ObjectOutputStream(TCPsocket.getOutputStream());
         sInput  = new ObjectInputStream(TCPsocket.getInputStream());
 
-        listenForMsg();
+        //listenForMsg();
 
     }
 
@@ -111,7 +110,7 @@ public class Sender extends Thread {
         os.flush();
         TCPsocket.close();
         System.out.println("File sent succesfully!");
-        System.exit(0);
+        //System.exit(0);
     }
 
     public void createConnection() throws InterruptedException, ClassNotFoundException, IOException {
@@ -136,12 +135,10 @@ public class Sender extends Thread {
             //Output.writeObject(sourceFilePath);
             sOutput.writeObject(this.file.getAbsolutePath());
 
-            if(transMissionProtocol == TCP) {
-                txWithTCP();
 
-            } else {
+            txWithTCP();
 
-            }
+
 
 
         } catch (IOException e1) {

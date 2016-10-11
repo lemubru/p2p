@@ -8,23 +8,34 @@ public class ClientThread  extends Thread {
     private ObjectOutputStream sOutput;     // to
     private ChatMessage chatMsg;
     private String screenName;
+    private int myport;
+    private String myIP;
 
-    public ClientThread(Socket insocket, String screenName,ObjectInputStream sInput, ObjectOutputStream sOutput) throws ClassNotFoundException, IOException {
+    public ClientThread(Socket insocket, String screenName,ObjectInputStream sInput, ObjectOutputStream sOutput, String ip, int port) throws ClassNotFoundException, IOException {
         this.screenName = screenName;
         this.sOutput = sOutput;
         this.sInput  = sInput;
         this.socket = insocket;
+        this.myIP = ip;
+        this.myport = port;
     }
 
     public String getScreenName() {
         return screenName;
     }
-/**
- * This method send a ChatMessage Object to the server
- * @param s input ChatMessage
- * @throws ClassNotFoundException
- * @throws IOException
- */
+    
+    public String getMyIP() {
+		return myIP;
+	}
+    public int getMyport() {
+		return myport;
+	}
+    /**
+     * This method send a ChatMessage Object to the server
+     * @param s input ChatMessage
+     * @throws ClassNotFoundException
+     * @throws IOException
+     */
     public void println(ChatMessage s) throws ClassNotFoundException, IOException {
         sOutput.writeObject(s);
     }
@@ -49,15 +60,15 @@ public class ClientThread  extends Thread {
             if(sInput != null) sInput.close();
 
         }
-        catch(Exception e) {} 
+        catch(Exception e) {}
         try {
             if(sOutput != null) sOutput.close();
         }
-        catch(Exception e) {} 
+        catch(Exception e) {}
         try {
             if(socket != null) socket.close();
         }
-        catch(Exception e) {} 
+        catch(Exception e) {}
         System.err.println("Closed client socket");
     }
 

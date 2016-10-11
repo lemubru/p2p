@@ -97,10 +97,10 @@ public class ServerManager extends Thread {
                             if(jth.getScreenName().equals(message.getMessage().substring(1, message.getMessage().indexOf(" ")))) {
                                 userfound = true;
                                 try {
-                                    message.setMessage(ith.getScreenName() + ":" + message.getMessage());
+                                    message.setMessage(ith.getScreenName() + ":" + message.getMessage() +">"+ith.getMyport());
                                     System.out.println("Message for "+ jth.getScreenName());
                                     jth.println(message);
-                                    ith.println(message);
+                                    //ith.println(message);
                                 } catch (ClassNotFoundException | IOException e) {
                                     // TODO Auto-generated catch block
                                     e.printStackTrace();

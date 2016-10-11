@@ -29,6 +29,7 @@ public class Receiver extends Thread {
     static boolean losspacket = false;
 
     public Receiver(String ip, int port) {
+    	myport = port;
     }
 
     public void setPauseDL(boolean pauseDL) {
@@ -94,19 +95,19 @@ public class Receiver extends Thread {
         int packetSize = 0;
         int numPackets = 0;
 
-        while(true){
-        	
-        serverSocket = new ServerSocket(8000);
-        System.out.println("waiting for files");
-        clientSocket = serverSocket.accept();
-        System.err.println("Created socket with client");
-        sInput  = new ObjectInputStream(clientSocket.getInputStream());
-        sOutput = new ObjectOutputStream(clientSocket.getOutputStream());
+        while(true) {
+
+            serverSocket = new ServerSocket(myport);
+            System.out.println("waiting for files");
+            clientSocket = serverSocket.accept();
+            System.err.println("Created socket with client");
+            sInput  = new ObjectInputStream(clientSocket.getInputStream());
+            sOutput = new ObjectOutputStream(clientSocket.getOutputStream());
 
 
-        sourceFilePath = (String) sInput.readObject();
-        //  Stopwatch timer2 = new Stopwatch();
-        rxWithTCP();
+            sourceFilePath = (String) sInput.readObject();
+            //  Stopwatch timer2 = new Stopwatch();
+            rxWithTCP();
         }
 
 
