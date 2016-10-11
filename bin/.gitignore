@@ -1,0 +1,17 @@
+/ChatClient$1.class
+/ChatClient$2.class
+/ChatClient$WhisperListener.class
+/ChatClient.class
+/ChatMessage.class
+/ChatRoomServer$1.class
+/ChatRoomServer.class
+/ClientThread.class
+/Receiver.class
+/Sender$1.class
+/Sender.class
+/ServerManager.class
+/addclient.sh
+/compile.sh
+/makefile
+/startserver.sh
+/temp/
