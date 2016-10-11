@@ -83,7 +83,12 @@ public class ChatRoomServer extends JFrame implements ActionListener  {
         System.err.println("ChatRoomServer started");
         while (true) {
             // wait for next client connection request
+            //Socket clientSocket = null;
+
             Socket clientSocket = serverSocket.accept();
+
+
+
             System.err.println("Created socket with client");
             ObjectInputStream sInput  = new ObjectInputStream(clientSocket.getInputStream());
             ObjectOutputStream sOutput = new ObjectOutputStream(clientSocket.getOutputStream());

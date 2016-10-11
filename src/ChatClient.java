@@ -199,7 +199,35 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     public void startRxThread() {
         rxThread = new Receiver(myIP, myport);
         rxThread.start();
+
+
+        Thread adminListen = new Thread(new Runnable() {
+            public void run() {
+                int rxp = rxThread.getBytesRead();
+                while(rxThread.isAlive()) {
+                    if(rxp != rxThread.getBytesRead()) {
+                        //if received packets changes get total packets and calculate the percentage completed
+                        int TP = rxThread.getFileLength();
+                        if(TP != 0) {
+                            float perc = (float) rxp / (float) TP;
+                            int percentage = (int)Math.round(perc*100);
+                            //System.out.println(percentage + "percentage");
+                            downloadbar.setValue(percentage);
+                        }
+                        // it.getFile().setText(it.getRxObject().getGetFileName());
+                        //  it.getTp().setText(""+ rounding( (((it.getRxObject().getPs()*rxp)/it.getRxObject().getTimerUDP().elapsedTime()) / 1000000), 2 ));
+                        rxp = rxThread.getRxPackets();
+                    }
+                }
+            }
+        });
+        adminListen.start();
+
+
+
     }
+
+
 
     public void displayGUI() {
 

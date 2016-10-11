@@ -199,7 +199,35 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     public void startRxThread() {
         rxThread = new Receiver(myIP, myport);
         rxThread.start();
+
+        
+        Thread adminListen = new Thread(new Runnable() {
+            public void run() {
+                int rxp = rxThread.getBytesRead();
+				while(rxThread.isAlive()) {
+				    if(rxp != rxThread.getBytesRead()) {
+				        //if received packets changes get total packets and calculate the percentage completed
+				        int TP = rxThread.getFileLength();
+				        if(TP != 0) {
+				            float perc = (float) rxp / (float) TP;
+				            int percentage = (int)Math.round(perc*100);
+				            //System.out.println(percentage + "percentage");
+				            downloadbar.setValue(percentage);
+				        }
+				        // it.getFile().setText(it.getRxObject().getGetFileName());
+				        //  it.getTp().setText(""+ rounding( (((it.getRxObject().getPs()*rxp)/it.getRxObject().getTimerUDP().elapsedTime()) / 1000000), 2 ));
+				        rxp = rxThread.getRxPackets();
+				    }
+				}
+            }
+        });
+        adminListen.start();
+        
+        
+    
     }
+    
+
 
     public void displayGUI() {
 
@@ -391,10 +419,10 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                     System.out.println("sending with TCP");
                     //sender.start();
                     if(typedText.getText().startsWith("@")) {
-                    	
-                    sendMessage(new ChatMessage(ChatMessage.DOWNLOADREQUEST,typedText.getText()));
-                    typedText.setText("");
-                    typedText.requestFocusInWindow();
+
+                        sendMessage(new ChatMessage(ChatMessage.DOWNLOADREQUEST,typedText.getText()));
+                        typedText.setText("");
+                        typedText.requestFocusInWindow();
                     }
                 }
             }
@@ -501,16 +529,18 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                     case ChatMessage.DOWNLOADREQUEST:
                         textArea.insert(s.getMessage() + "\n", textArea.getText().length());
                         textArea.setCaretPosition(textArea.getText().length());
-                        if (file != null){
+                        int reqport = Integer.parseInt(s.getMessage().substring(s.getMessage().indexOf(">")+1,s.getMessage().length()));
+                        System.out.println(reqport);
+                        if (file != null) {
                             try {
-                                sender = new Sender(file);
+                                sender = new Sender(file, reqport);
                                 sender.start();
                             } catch (IOException e1) {
                                 // TODO Auto-generated catch block
                                 e1.printStackTrace();
                             }
                         } else {
-                        	displayOnScreen("no files");
+                            displayOnScreen("no files");
                         }
                         break;
                     case ChatMessage.USERSONLINE:

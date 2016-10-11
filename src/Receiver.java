@@ -21,8 +21,11 @@ public class Receiver extends Thread {
     private boolean pauseDL = false;
     private ObjectOutputStream sOutput;
     private String sourceFilePath;
-
+    private int bytesRead;
+    private boolean fileDownloadDone;
     private String myIP;
+    private int fileLength;
+    private FileObj filedata;
     private int myport;
     private String destinationPathUDP = "/home/frank/Dropbox/WorkSpace_ONCLOUD/RBUDP/dest/";
     private String destinationPathTCP = "destTCP/";
@@ -30,6 +33,8 @@ public class Receiver extends Thread {
 
     public Receiver(String ip, int port) {
         myport = port;
+        bytesRead = 0;
+        fileDownloadDone = false;
     }
 
     public void setPauseDL(boolean pauseDL) {
@@ -57,7 +62,7 @@ public class Receiver extends Thread {
         InputStream is = clientSocket.getInputStream();
 
         //No of bytes read in one read() call
-        int bytesRead = 0;
+        bytesRead = 0;
 
         while((bytesRead=is.read(contents))!=-1)
             bos.write(contents, 0, bytesRead);
@@ -65,12 +70,30 @@ public class Receiver extends Thread {
         bos.flush();
         clientSocket.close();
         serverSocket.close();
+        System.out.println(bytesRead);
         System.out.println("File saved successfully!");
+        fileDownloadDone  =true;
 
 
 
 
     }
+
+    public int getBytesRead() {
+        return bytesRead;
+    }
+
+    public int getFileLength() {
+        return fileLength;
+    }
+
+
+    public boolean getfileDownloadDOne() {
+        return fileDownloadDone;
+    }
+
+
+
     public int getPs() {
         return ps;
     }
@@ -105,7 +128,10 @@ public class Receiver extends Thread {
             sOutput = new ObjectOutputStream(clientSocket.getOutputStream());
 
 
-            sourceFilePath = (String) sInput.readObject();
+            filedata = (FileObj) sInput.readObject();
+            sourceFilePath = filedata.getFilePath();
+            fileLength = filedata.getFileLength();
+            System.out.println(fileLength);
             //  Stopwatch timer2 = new Stopwatch();
             rxWithTCP();
         }

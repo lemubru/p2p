@@ -25,11 +25,12 @@ public class Sender extends Thread {
     private int seqSize = 0;
     private int sendport = 0;
     private boolean showpause = false;
+    private FileObj filedata;
     public Sender(File file, int port) throws IOException {
         this.file = file;
         sendport = port;
         sourceFilePath = this.file.getAbsolutePath();
-
+        filedata = new FileObj(file.getAbsolutePath(), (int)file.length());
         TCPsocket = new Socket(hostName,port);
         sOutput = new ObjectOutputStream(TCPsocket.getOutputStream());
         sInput  = new ObjectInputStream(TCPsocket.getInputStream());
@@ -133,7 +134,8 @@ public class Sender extends Thread {
 
 
             //Output.writeObject(sourceFilePath);
-            sOutput.writeObject(this.file.getAbsolutePath());
+            sOutput.writeObject(filedata);
+            //sOutput.writeObject(this.file.length());
 
 
             txWithTCP();

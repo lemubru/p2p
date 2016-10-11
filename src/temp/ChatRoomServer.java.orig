@@ -83,21 +83,26 @@ public class ChatRoomServer extends JFrame implements ActionListener  {
         System.err.println("ChatRoomServer started");
         while (true) {
             // wait for next client connection request
-            Socket clientSocket = serverSocket.accept();
+        	//Socket clientSocket = null;
+        	
+        	Socket clientSocket = serverSocket.accept();
+        		
+        	
+        		
             System.err.println("Created socket with client");
             ObjectInputStream sInput  = new ObjectInputStream(clientSocket.getInputStream());
             ObjectOutputStream sOutput = new ObjectOutputStream(clientSocket.getOutputStream());
-            
+
             String  s;
             String clientIP;
             String clientport;
             String clientuser;
             try {
                 s = (String) sInput.readObject();
-                clientIP = s.substring(s.indexOf("+"), s.indexOf(":"));
-                clientport = s.substring(s.indexOf(":"), s.length());
+                clientIP = s.substring(s.indexOf("+")+1, s.indexOf(":"));
+                clientport = s.substring(s.indexOf(":")+1, s.length());
                 clientuser = s.substring(0, s.indexOf("+"));
-               
+
                 System.out.println(clientuser + " has connected IP , port:" +clientIP + ":"  + clientport);
             }
             catch(IOException e) {
@@ -116,7 +121,7 @@ public class ChatRoomServer extends JFrame implements ActionListener  {
 
             if(!usertaken) {
                 sOutput.writeObject(new ChatMessage(ChatMessage.SUCCESS, "Success!"));
-                ClientThread connection = new ClientThread(clientSocket,clientuser,sInput, sOutput);
+                ClientThread connection = new ClientThread(clientSocket,clientuser,sInput, sOutput, clientIP, Integer.parseInt(clientport));
                 connections.add(connection);
                 connection.start();
             }
