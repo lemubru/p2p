@@ -1,0 +1,137 @@
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+public class InputFrame extends JFrame implements ActionListener,ListSelectionListener {
+
+
+    private Socket socket;
+
+    // for writing to and reading from the server
+    private Out out;
+    private In in;
+
+    private ObjectInputStream sInput;       // to read from the socket
+    private ObjectOutputStream sOutput;     // to
+
+    private String screenName;
+    private String serverAddress;
+    private boolean successConnect;
+
+
+    public InputFrame() {
+        // TODO Auto-generated constructor stub
+
+
+        // Add a window listner for close button
+        this.addWindowListener(new WindowAdapter() {
+
+            public void windowClosing(WindowEvent e) {
+                System.exit(0);
+            }
+        });
+        JTextField userNameField   = new JTextField(32);
+        userNameField.setText("frank");
+        JTextField hostNameField   = new JTextField(32);
+        hostNameField.setText("localhost");
+        String name = "";
+        // This is an empty content area in the frame
+        JLabel hostLbl = new JLabel("Hostname");
+        JLabel usernameLbl = new JLabel("Username");
+        JButton connect = new JButton("sd");
+        successConnect = false;
+        JPanel bottomPane = new JPanel();
+        bottomPane.add(userNameField, BorderLayout.WEST);
+        bottomPane.add(usernameLbl,BorderLayout.NORTH);
+        bottomPane.add(connect , BorderLayout.WEST);
+        hostLbl.setPreferredSize(new Dimension(175, 100));
+        usernameLbl.setPreferredSize(new Dimension(175, 100));
+        this.getContentPane().add(hostLbl, BorderLayout.CENTER);
+        this.getContentPane().add(hostNameField, BorderLayout.EAST);
+        this.getContentPane().add(bottomPane, BorderLayout.SOUTH);
+        this.pack();
+        this.setVisible(true);
+
+        connect.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO Auto-generated method stub
+                try {
+                    socket = new Socket(hostNameField.getText(), 4444);
+                    sOutput = new ObjectOutputStream(socket.getOutputStream());
+                    sOutput.writeObject(userNameField.getText());
+                    sInput  = new ObjectInputStream(socket.getInputStream());
+                    ChatMessage s_msg= (ChatMessage) sInput.readObject();
+                    if(s_msg.getType() == ChatMessage.SUCCESS) {
+                        System.out.println("!!!!!");
+                        successConnect = true;
+                    } else {
+                        System.out.println("FAIL TO CONNECT");
+                        System.out.println(s_msg.getMessage());
+                        socket.close();
+
+                    }
+                }
+                catch (Exception ex) {
+                    System.out.println("failed");
+                    ex.printStackTrace();
+                }
+                System.out.println(successConnect);
+                if(successConnect) {
+                    System.out.println("YAY!");
+                    ChatClient client = new ChatClient(userNameField.getText(), hostNameField.getText(), socket, sInput, sOutput);
+                    client.listen();
+                }
+                
+                System.out.println("connect button pressed");
+            }
+        });
+
+
+
+
+
+
+
+    }
+
+    public String getServerAddress() {
+        return serverAddress;
+    }
+
+    public String getScreenName() {
+        return screenName;
+    }
+    @Override
+    public void valueChanged(ListSelectionEvent arg0) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public static void main(String[] args) {
+        InputFrame start = new InputFrame();
+    }
+
+}
