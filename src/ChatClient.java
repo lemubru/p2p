@@ -56,6 +56,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         testname[1] = "fred";
         testname[2] = "dan";
         testname[3] = "ben";
+        //sdfsd
         testname[4] = "alex";
         testname[5] = "shaun";
         testname[6] = "frank";
