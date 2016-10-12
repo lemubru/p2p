@@ -610,7 +610,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
                         break;
                     case ChatMessage.SEARCH_RESULT:
-                    	
+                    	//TODO
                         break;
                     default:
                         break;
