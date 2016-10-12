@@ -263,6 +263,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
             public void actionPerformed(ActionEvent e) {
                 // TODO Auto-generated method stub
                 //rxThread.setPauseDL(false);
+                rxThread.informSender("resume");
                 System.out.println("resume pressed");
                 // rxThread.informSender("resume");
             }
@@ -275,6 +276,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                 // TODO Auto-generated method stub
                 //rxThread.setPauseDL(true);
                 //rxThread.informSender("pause");
+                rxThread.informSender("pause");
                 System.out.println("pause pressed");
             }
         });
@@ -570,19 +572,6 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                                     }
                                 });
                                 adminListen.start();
-
-
-//df
-
-
-
-
-
-
-
-
-
-
 
 
                             } catch (IOException e1) {

@@ -49,7 +49,7 @@ public class RxGUI extends JPanel {
             public void actionPerformed(ActionEvent arg0) {
                 // TODO Auto-generated method stub
                 //rxThread.setPauseDL(true);
-                // rxThread.informSender("pause");
+                rxThread.informSender("pause");
             }
         });
 

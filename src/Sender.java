@@ -42,6 +42,13 @@ public class Sender extends Thread {
     private String fileName;
     private boolean showpause = false;
     private FileObj filedata;
+
+    private Object lock = new Object();
+
+
+
+
+
     public Sender(File file, int port) throws IOException {
         this.file = file;
         sendport = port;
@@ -52,6 +59,7 @@ public class Sender extends Thread {
         sOutput = new ObjectOutputStream(TCPsocket.getOutputStream());
         sInput  = new ObjectInputStream(TCPsocket.getInputStream());
         uploadDone = false;
+        this.lock = lock;
 
 //        KeyGenerator kg = KeyGenerator.getInstance("DES");
 //		kg.init(new SecureRandom());
@@ -59,7 +67,7 @@ public class Sender extends Thread {
 //		SecretKeyFactory skf = SecretKeyFactory.getInstance("DES");
 //		Class spec = Class.forName("javax.crypto.spec.DESKeySpec");
 //		DESKeySpec ks = (DESKeySpec) skf.getKeySpec(key, spec);
-        //listenForMsg();
+        listenForMsg();
 
     }
 
@@ -90,15 +98,7 @@ public class Sender extends Thread {
         }
     }
 
-    synchronized void waits() {
-        try {
-            // Calling wait() will block this thread until another thread
-            // calls notify() on the object.
-            this.wait();
-        } catch (InterruptedException e) {
-            // Happens if someone interrupts your thread.
-        }
-    }
+
 
     public long getCurrent() {
         return current;
@@ -129,11 +129,29 @@ public class Sender extends Thread {
 
             // System.out.println("pause");
             if(pauseUpload) {
+
+                try {
+                    synchronized (lock) {
+                        lock.wait();
+                    }
+                    System.out.println("hello");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+
+                /**
+                 *
                 while(!Thread.currentThread().isInterrupted()) {
                     if(pauseUpload == false) {
                         Thread.currentThread().interrupt();
+
+
                     }
                 }
+                 */
+                //Thread.currentThread().sleep(10);
+
             }
 
             //}
@@ -209,6 +227,9 @@ public class Sender extends Thread {
                             showpause = true;
                         } else {
                             // wake();
+                            synchronized (lock) {
+                                lock.notify();
+                            }
                             pauseUpload = false;
                             showpause = false;
                         }

@@ -263,6 +263,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
             public void actionPerformed(ActionEvent e) {
                 // TODO Auto-generated method stub
                 //rxThread.setPauseDL(false);
+            	 rxThread.informSender("resume");
                 System.out.println("resume pressed");
                 // rxThread.informSender("resume");
             }
@@ -275,6 +276,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                 // TODO Auto-generated method stub
                 //rxThread.setPauseDL(true);
                 //rxThread.informSender("pause");
+            	 rxThread.informSender("pause");
                 System.out.println("pause pressed");
             }
         });
@@ -551,7 +553,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                                 Thread adminListen = new Thread(new Runnable() {
                                     public void run() {
                                         while(sender.isAlive()) {
-                                        	uploadProgLabel.setText("Upload progress...");
+                                            uploadProgLabel.setText("Upload progress...");
 
                                             uploadbar.setMaximum(100);
                                             //if received packets changes get total packets and calculate the percentage completed
@@ -570,19 +572,6 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                                     }
                                 });
                                 adminListen.start();
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
                             } catch (IOException e1) {
