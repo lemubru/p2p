@@ -195,8 +195,6 @@ public class Sender extends Thread {
             /**
              * Send receiver info about the file over TCP
              */
-
-
             //Output.writeObject(sourceFilePath);
             sOutput.writeObject(filedata);
             //sOutput.writeObject(this.file.length());

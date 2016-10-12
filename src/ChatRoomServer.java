@@ -34,6 +34,7 @@ public class ChatRoomServer extends JFrame implements ActionListener  {
     private Vector<ClientThread> connections;
     private ServerManager connectionListener;
     private boolean endServer;
+
     public ChatRoomServer(int port) {
         endServer = false;
         connections        = new Vector<ClientThread>();
@@ -111,7 +112,7 @@ public class ChatRoomServer extends JFrame implements ActionListener  {
             boolean usertaken = false;
             for (ClientThread jth : connections) {
 
-                if(jth.getScreenName().equals(s)) {
+                if(jth.getScreenName().equals(clientuser)) {
                     sOutput.writeObject(new ChatMessage(ChatMessage.ERROR, "username taken, sorry"));
                     clientSocket.close();
                     usertaken = true;

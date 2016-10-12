@@ -70,7 +70,8 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     private ObjectInputStream sInput;
     private ObjectOutputStream sOutput;
     private boolean InChatRoom = false;
-
+    private String downloader;
+    private String uploader;
     private boolean successConnect = false;
     @SuppressWarnings("unchecked")
     public ChatClient() {
@@ -336,6 +337,8 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                     // Double-click detected
                     int index = list.locationToIndex(evt.getPoint());
                     String name = (String) listModelSearches.getElementAt(index);
+                    uploader = name.substring(name.lastIndexOf(":")+1,name.length());
+                    System.out.println(uploader);
                     System.out.println(name);
 
                 }
@@ -563,9 +566,6 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                             try {
                                 sender = new Sender(file, reqport);
                                 sender.start();
-
-
-
                                 Thread adminListen = new Thread(new Runnable() {
                                     public void run() {
                                         while(sender.isAlive()) {
@@ -612,7 +612,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                         int i = 0;
                         for (File file : sharedFiles) {
                             if (file.getName().indexOf(s.getMessage()) != -1) {
-                                foundItems[0] = file.getName() + ":"+ myport;
+                                foundItems[i] = file.getName() + ":"+ screenName;
                                 i++;
                             }
                         }

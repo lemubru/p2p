@@ -70,7 +70,8 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     private ObjectInputStream sInput;
     private ObjectOutputStream sOutput;
     private boolean InChatRoom = false;
-
+    private String downloader;
+    private String uploader;
     private boolean successConnect = false;
     @SuppressWarnings("unchecked")
     public ChatClient() {
@@ -332,10 +333,12 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
                 JList list = (JList)evt.getSource();
                 if (evt.getClickCount() == 1) {
-
+                	
                     // Double-click detected
                     int index = list.locationToIndex(evt.getPoint());
                     String name = (String) listModelSearches.getElementAt(index);
+                    uploader = name.substring(name.lastIndexOf(":")+1,name.length());
+                    System.out.println(uploader);
                     System.out.println(name);
 
                 }
@@ -563,9 +566,6 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                             try {
                                 sender = new Sender(file, reqport);
                                 sender.start();
-
-
-
                                 Thread adminListen = new Thread(new Runnable() {
                                     public void run() {
                                         while(sender.isAlive()) {
@@ -612,7 +612,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                         int i = 0;
                         for (File file : sharedFiles) {
                             if (file.getName().indexOf(s.getMessage()) != -1) {
-                                foundItems[0] = file.getName();
+                                foundItems[i] = file.getName() + ":"+ screenName;
                                 i++;
                             }
                         }
@@ -620,10 +620,12 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
                         break;
                     case ChatMessage.SEARCH_RESULT:
-<<<<<<< HEAD
-=======
-                    	//TODO
->>>>>>> 9a94df79e62c84a5f856bbfc1cbf52f7d9d5c347
+                        String results[] = s.getSearchResults();
+                        for (int j = 0; j < results.length; j++) {
+                            listModelSearches.insertElementAt(results[j], 0);
+                            Thread.sleep(20);
+                        }
+
                         break;
                     default:
                         break;

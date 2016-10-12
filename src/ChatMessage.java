@@ -2,7 +2,7 @@ import java.io.*;
 
 public class ChatMessage implements Serializable {
 
-    static final int USERSONLINE = 0, MESSAGE = 1, ERROR = 2, SUCCESS = 3, DOWNLOADREQUEST = 4;
+    static final int USERSONLINE = 0, MESSAGE = 1, ERROR = 2, SUCCESS = 3, DOWNLOADREQUEST = 4, DOWNLOADFILE = 10;
 
     static final int SEARCH = 5, SEARCH_RESULT = 6;
     protected static final long serialVersionUID = 1112122200L;
