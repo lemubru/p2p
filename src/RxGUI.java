@@ -49,11 +49,10 @@ public class RxGUI extends JPanel {
             public void actionPerformed(ActionEvent arg0) {
                 // TODO Auto-generated method stub
                 //rxThread.setPauseDL(true);
-<<<<<<< HEAD
+
                 // rxThread.informSender("pause");
-=======
-                rxThread.informSender("pause");
->>>>>>> branch 'master' of https://Shaun_de_Jager@bitbucket.org/frankdp1993/cs354_p2p.git
+
+
             }
         });
 
