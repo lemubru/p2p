@@ -1,0 +1,107 @@
+******************************************************************************
+ *  Compilation:  javac ChatRoomServer.java
+ *  Execution:    java ChatRoomServer
+ *  Dependencies: In.java Out.java Connection.java ConnectionListener.java
+ *
+ *  Creates a server to listen for incoming connection requests on
+ *  port 4444.
+ *
+ *  % java ChatRoomServer
+ *
+ *  Remark
+ *  -------
+ *    - Use Vector instead of ArrayList since it's synchronized.
+ *
+ ******************************************************************************/
+import java.awt.*;
+import java.awt.event.*;
+import java.io.IOException;
+
+import javax.swing.*;
+
+import java.net.Socket;
+
+import java.net.ServerSocket;
+import java.util.Vector;
+
+public class ChatRoomServer extends JFrame implements ActionListener  {
+
+    private JButton startBtn;
+    private JButton stopBtn
+    ;
+    private ServerSocket serverSocket;
+    private Vector<Connection> connections;
+    private ConnectionListener connectionListener;
+    private boolean endServer;
+    public ChatRoomServer() throws IOException {
+        endServer = false;
+        connections        = new Vector<Connection>();
+        serverSocket             = new ServerSocket(4444);
+        connectionListener = new ConnectionListener(connections);
+
+        connectionListener.start();
+
+        addWindowListener(
+        new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                closeServer();
+
+                System.exit(1);
+//                    try                   { socket.close();        }
+//                    catch (Exception ioe) { ioe.printStackTrace(); }
+            }
+        }
+        );
+
+
+        Container content = getContentPane();
+        content.setSize(800,400);
+        startBtn = new JButton("Start");
+        startBtn.setPreferredSize(new Dimension(400, 400));
+        stopBtn = new JButton();
+        startBtn.addActionListener(this);
+        content.add(startBtn);
+        pack();
+        startBtn.requestFocusInWindow();
+        setVisible(true);
+
+    }
+
+    public void runServer() throws IOException {
+        System.err.println("ChatRoomServer started");
+
+        while (true) {
+            // wait for next client connection request
+            Socket clientSocket = serverSocket.accept();
+            In in    = new In(clientSocket);
+            String s = in.readLine();
+            System.out.println(s + "to the server");
+            System.err.println("Created socket with client");
+
+            // listen to client in a separate thread
+            Connection connection = new Connection(clientSocket,s);
+            connections.add(connection);
+            connection.start();
+
+        }
+    }
+    public void closeServer() {
+        endServer = true;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        System.out.println("lolol");
+        connectionListener.setServerMessage("from server");
+        closeServer();
+    }
+    public static void main(String[] args) throws Exception {
+
+        ChatRoomServer cs = new ChatRoomServer();
+        cs.runServer();
+        // thread that broadcasts messages to clients
+
+
+    }
+
+
+}
