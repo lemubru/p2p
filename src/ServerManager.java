@@ -80,8 +80,33 @@ public class ServerManager extends Thread {
                 }
                 ChatMessage message = ith.getChatMessage();
                 if (message != null) {
-
-                    if(message.getMessage().startsWith("@")) {
+                	
+                	if (message.getType() == ChatMessage.SEARCH) {   	
+                        for (ClientThread jth : connections) {
+                            try {
+                            	if (!ith.equals(jth)) {
+                            		jth.println(message);
+                            	}	
+                            } catch (ClassNotFoundException | IOException e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                	else if (message.getType() == ChatMessage.SEARCH_RESULT) {
+                		for (ClientThread jth : connections) {
+                            try {
+                            	if (message.getPort() == jth.getMyport()) {
+                            		jth.println(message);
+                            	}
+                            } catch (ClassNotFoundException | IOException e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                            }
+                        }
+                	}
+                	
+                	else if (message.getMessage().startsWith("@")) {
                         if(message.getMessage().indexOf(" ") == -1) {
                             try {
                                 ith.println(new ChatMessage(ChatMessage.MESSAGE, "invalid message: put space after username and then type message"));
@@ -119,7 +144,9 @@ public class ServerManager extends Thread {
 
 
                     } else {
-                        message.setMessage(ith.getScreenName() + ":" + message.getMessage());
+                    	if (message.getType() != ChatMessage.SEARCH) {
+                    		message.setMessage(ith.getScreenName() + ":" + message.getMessage());
+                    	}
                         for (ClientThread jth : connections) {
                             try {
                                 jth.println(message);

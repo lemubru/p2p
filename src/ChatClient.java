@@ -602,7 +602,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                         int i = 0;
                         for (File file : sharedFiles) {
                             if (file.getName().indexOf(s.getMessage()) != -1) {
-                                foundItems[0] = file.getName();
+                                foundItems[i] = file.getName() + ":" + myport;
                                 i++;
                             }
                         }
@@ -610,6 +610,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
                         break;
                     case ChatMessage.SEARCH_RESULT:
+                    	
                         break;
                     default:
                         break;
