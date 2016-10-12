@@ -3,11 +3,26 @@ import java.io.*;
 public class ChatMessage implements Serializable {
 
     static final int USERSONLINE = 0, MESSAGE = 1, ERROR = 2, SUCCESS = 3, DOWNLOADREQUEST = 4;
+    static final int SEARCH = 5, SEARCH_RESULT = 6;
     protected static final long serialVersionUID = 1112122200L;
 
     private String message;
     private String userList[];
+    private String searchResults[];
     private int type;
+    private int port;
+    
+    ChatMessage(int type, String message, int port) {
+    	this.type = type;
+    	this.message = message;
+    	this.port = port;
+    }
+    
+    ChatMessage(int type, String[] searchResults, int port) {
+    	this.type = type;
+    	this.searchResults = searchResults;
+    	this.port = port;
+    }
 
     ChatMessage(int type, String message) {
         this.type = type;
@@ -36,5 +51,9 @@ public class ChatMessage implements Serializable {
     }
     public  String getMessage() {
         return message;
+    }
+    
+    int getPort() {
+    	return port;
     }
 }
