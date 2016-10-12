@@ -43,6 +43,10 @@ public class ChatMessage implements Serializable {
         return type;
     }
 
+    public String[] getSearchResults() {
+        return searchResults;
+    }
+
     public void setType(int type) {
         this.type = type;
     }

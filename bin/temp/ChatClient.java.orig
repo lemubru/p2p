@@ -30,6 +30,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     static final int MAXIMUM = 100;
     static final int MINIMUM = 0;
     private JButton searchBtn;
+    private JButton chooseDLFolderBtn;
     private Vector<File> sharedFiles;
     private String[] foundItems;
     private JTextField searchField;
@@ -128,6 +129,8 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         } else {
             System.exit(1);
         }
+        System.out.println("Working Directory = " +
+                           System.getProperty("user.dir"));
         boolean success = false;
         while(!success) {
             try {
@@ -345,6 +348,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         OnlineUserListModel = new DefaultListModel();
 
         JPanel OnlineUsers = new JPanel(new BorderLayout());
+        OnlineUsers.setPreferredSize(new Dimension(70,80));
         //Create the list and put it in a scroll pane.
         onlineUserList = new JList(OnlineUserListModel);
         onlineUserList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -381,6 +385,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         uploadProgLabel = new JLabel("Upload progress..");
 
         JPanel searchPane = new JPanel();
+        JPanel lowersearchPane = new JPanel();
         JPanel lowerPane = new JPanel();
         lowerPane.setLayout(new GridLayout(1, 2));
         JPanel progressPane = new JPanel();
@@ -446,6 +451,9 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
             }
         });
 
+        chooseDLFolderBtn = new JButton("Choose Download Folder");
+        chooseDLFolderBtn.setToolTipText("This is the folder where all the files will be downloaded to");
+
         searchBtn = new JButton("Search");
 
         searchBtn.addActionListener(new ActionListener() {
@@ -463,6 +471,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         searchPane.add(searchField);
         searchPane.add(searchBtn);
         searchPane.add(downloadBtn);
+        lowersearchPane.add(chooseDLFolderBtn);
 
 
         JScrollPane listScrollPane = new JScrollPane(onlineUserList);
@@ -474,14 +483,15 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         whisperBtn = new JButton("Whisper");
         whisperBtn.addActionListener(new WhisperListener());
         buttonPane.add(typedText);
-        buttonPane.add(whisperBtn);
+        //buttonPane.add(whisperBtn);
 
         OnlineUsers.add(listScrollPane, BorderLayout.CENTER);
         OnlineUsers.add(buttonPane, BorderLayout.PAGE_END);
 
+        searchPanel.add(searchPane, BorderLayout.BEFORE_FIRST_LINE);
         searchPanel.add(searchfilesScrollPane,BorderLayout.CENTER);
 
-        searchPanel.add(searchPane, BorderLayout.PAGE_END);
+        searchPanel.add(lowersearchPane, BorderLayout.AFTER_LAST_LINE);
 
 
         textArea.setEditable(false);
@@ -602,7 +612,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                         int i = 0;
                         for (File file : sharedFiles) {
                             if (file.getName().indexOf(s.getMessage()) != -1) {
-                                foundItems[i] = file.getName() + ":" + myport;
+                                foundItems[0] = file.getName();
                                 i++;
                             }
                         }
@@ -610,7 +620,10 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
                         break;
                     case ChatMessage.SEARCH_RESULT:
-                    	
+<<<<<<< HEAD
+=======
+                    	//TODO
+>>>>>>> 9a94df79e62c84a5f856bbfc1cbf52f7d9d5c347
                         break;
                     default:
                         break;
