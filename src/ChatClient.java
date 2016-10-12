@@ -444,12 +444,10 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                 if (evt.getClickCount() == 1) {
                     System.out.println("sending with TCP");
                     //sender.start();
-                    if(typedText.getText().startsWith("@")) {
-
-                        sendMessage(new ChatMessage(ChatMessage.DOWNLOADREQUEST,typedText.getText()));
+                        sendMessage(new ChatMessage(ChatMessage.DOWNLOADREQUEST,"@"+uploader));
                         typedText.setText("");
                         typedText.requestFocusInWindow();
-                    }
+                    
                 }
             }
         });
