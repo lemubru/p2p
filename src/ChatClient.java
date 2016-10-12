@@ -80,6 +80,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         JTextField userNameField = new JTextField(5);
         JTextField myIPField = new JTextField(5);
         hostNameField.setText("localhost");
+        sharedFiles = new Vector<File>();
         myIPField.setText("localhost");
         portField.setText("4444");
         String[] testname = new String[20];
@@ -411,9 +412,9 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
             @Override
             public void actionPerformed(ActionEvent e) {
                 // TODO Auto-generated method stub
-            	   showChooser();
-                   sharedFiles.add(file);
-                   myFilesListModel.insertElementAt(file.getAbsolutePath(), 0);
+                showChooser();
+                sharedFiles.add(file);
+                myFilesListModel.insertElementAt(file.getAbsolutePath(), 0);
             }
         });
         // shareFilePane.add(chooser);
@@ -452,7 +453,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
             @Override
             public void actionPerformed(ActionEvent e) {
                 // TODO Auto-generated method stub
-            	sendMessage(new ChatMessage(ChatMessage.SEARCH, searchField.getText(), myport));
+                sendMessage(new ChatMessage(ChatMessage.SEARCH, searchField.getText(), myport));
             }
         });
 
@@ -595,21 +596,21 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                             OnlineUserListModel.insertElementAt(onlineUsers[i], 0);
                         }
                         break;
-                        
+
                     case ChatMessage.SEARCH:
-                    	foundItems = new String[sharedFiles.size()];
-                    	int i = 0;
-                    	for (File file : sharedFiles) {
-							if (file.getName().indexOf(s.getMessage()) != -1) {
-								foundItems[0] = file.getName();
-								i++;
-							}
-						}
-                    	sendMessage(new ChatMessage(ChatMessage.SEARCH_RESULT, foundItems, s.getPort()));
-                    	
-                    	break;
+                        foundItems = new String[sharedFiles.size()];
+                        int i = 0;
+                        for (File file : sharedFiles) {
+                            if (file.getName().indexOf(s.getMessage()) != -1) {
+                                foundItems[0] = file.getName();
+                                i++;
+                            }
+                        }
+                        sendMessage(new ChatMessage(ChatMessage.SEARCH_RESULT, foundItems, s.getPort()));
+
+                        break;
                     case ChatMessage.SEARCH_RESULT:
-                    	break;
+                        break;
                     default:
                         break;
                     }

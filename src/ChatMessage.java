@@ -12,17 +12,17 @@ public class ChatMessage implements Serializable {
     private String searchResults[];
     private int type;
     private int port;
-    
+
     ChatMessage(int type, String message, int port) {
-    	this.type = type;
-    	this.message = message;
-    	this.port = port;
+        this.type = type;
+        this.message = message;
+        this.port = port;
     }
-    
+
     ChatMessage(int type, String[] searchResults, int port) {
-    	this.type = type;
-    	this.searchResults = searchResults;
-    	this.port = port;
+        this.type = type;
+        this.searchResults = searchResults;
+        this.port = port;
     }
 
     ChatMessage(int type, String message) {
@@ -53,9 +53,9 @@ public class ChatMessage implements Serializable {
     public  String getMessage() {
         return message;
     }
-    
+
     int getPort() {
-    	return port;
+        return port;
 
     }
 }
