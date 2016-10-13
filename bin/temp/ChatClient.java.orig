@@ -333,7 +333,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
                 JList list = (JList)evt.getSource();
                 if (evt.getClickCount() == 1) {
-                	
+
                     // Double-click detected
                     int index = list.locationToIndex(evt.getPoint());
                     String name = (String) listModelSearches.getElementAt(index);
@@ -444,12 +444,10 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                 if (evt.getClickCount() == 1) {
                     System.out.println("sending with TCP");
                     //sender.start();
-                    if(typedText.getText().startsWith("@")) {
-
-                        sendMessage(new ChatMessage(ChatMessage.DOWNLOADREQUEST,typedText.getText()));
+                        sendMessage(new ChatMessage(ChatMessage.DOWNLOADREQUEST,"@"+uploader));
                         typedText.setText("");
                         typedText.requestFocusInWindow();
-                    }
+                    
                 }
             }
         });
@@ -508,7 +506,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         content.add(OnlineUsers, BorderLayout.EAST);
         JPanel chatbar = new JPanel();
         //chatbar.add(typedText);
-        //content.add(chatbar);
+        //content.add(chatbar);cd .
         // content.add(typedText, BorderLayout.AFTER_LAST_LINE);
         content.add(lowerPane, BorderLayout.PAGE_END);
         content.add(searchPanel, BorderLayout.WEST);

@@ -72,6 +72,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     private boolean InChatRoom = false;
     private String downloader;
     private String uploader;
+    private String selectedFile;
     private boolean successConnect = false;
     @SuppressWarnings("unchecked")
     public ChatClient() {
@@ -337,6 +338,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                     // Double-click detected
                     int index = list.locationToIndex(evt.getPoint());
                     String name = (String) listModelSearches.getElementAt(index);
+                    selectedFile = name.substring(0, name.lastIndexOf(":"));
                     uploader = name.substring(name.lastIndexOf(":")+1,name.length());
                     System.out.println(uploader);
                     System.out.println(name);
@@ -444,10 +446,10 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                 if (evt.getClickCount() == 1) {
                     System.out.println("sending with TCP");
                     //sender.start();
-                        sendMessage(new ChatMessage(ChatMessage.DOWNLOADREQUEST,"@"+uploader));
-                        typedText.setText("");
-                        typedText.requestFocusInWindow();
-                    
+                    sendMessage(new ChatMessage(ChatMessage.DOWNLOADREQUEST,"@"+uploader + " +" + selectedFile));
+                    typedText.setText("");
+                    typedText.requestFocusInWindow();
+
                 }
             }
         });
@@ -506,7 +508,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         content.add(OnlineUsers, BorderLayout.EAST);
         JPanel chatbar = new JPanel();
         //chatbar.add(typedText);
-        //content.add(chatbar);
+        //content.add(chatbar);cd .
         // content.add(typedText, BorderLayout.AFTER_LAST_LINE);
         content.add(lowerPane, BorderLayout.PAGE_END);
         content.add(searchPanel, BorderLayout.WEST);
@@ -560,6 +562,11 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                         textArea.setCaretPosition(textArea.getText().length());
                         int reqport = Integer.parseInt(s.getMessage().substring(s.getMessage().indexOf(">")+1,s.getMessage().length()));
                         System.out.println(reqport);
+                        String msg = s.getMessage();
+                        String reqfile = msg.substring(msg.indexOf("+")+1, msg.indexOf(">"));
+                        displayOnScreen(reqfile);
+
+
                         if (file != null) {
                             try {
                                 sender = new Sender(file, reqport);
@@ -619,6 +626,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                         break;
                     case ChatMessage.SEARCH_RESULT:
                         String results[] = s.getSearchResults();
+                        listModelSearches.removeAllElements();
                         for (int j = 0; j < results.length; j++) {
                             listModelSearches.insertElementAt(results[j], 0);
                             Thread.sleep(20);

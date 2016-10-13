@@ -178,15 +178,12 @@ public class Receiver extends Thread {
         int numPackets = 0;
 
         while(true) {
-
             serverSocket = new ServerSocket(myport);
             System.out.println("waiting for files");
             clientSocket = serverSocket.accept();
             System.err.println("Created socket with client");
             sInput  = new ObjectInputStream(clientSocket.getInputStream());
             sOutput = new ObjectOutputStream(clientSocket.getOutputStream());
-
-
             filedata = (FileObj) sInput.readObject();
             sourceFilePath = filedata.getFilePath();
             fileLength = filedata.getFileLength();

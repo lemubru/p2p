@@ -131,10 +131,8 @@ public class Sender extends Thread {
             int x = 0;
             //while(pauseUpload == true) {
             //   x = 3+ 3 + 3*3;
-
             // System.out.println("pause");
             if(pauseUpload) {
-
                 try {
                     synchronized (lock) {
                         lock.wait();
@@ -143,22 +141,16 @@ public class Sender extends Thread {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
-
                 /**
                  *
                 while(!Thread.currentThread().isInterrupted()) {
                     if(pauseUpload == false) {
                         Thread.currentThread().interrupt();
-
-
                     }
                 }
                  */
                 //Thread.currentThread().sleep(10);
-
             }
-
             //}
             int size = 8192;
             if(fileLength - current >= size)
@@ -241,17 +233,17 @@ public class Sender extends Thread {
 
                     }
                 } catch (ClassNotFoundException | IOException e) {
+                    try {
+                        TCPsocket.close();
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-
             }
         };
-
         thread.start();
     }
-
-
-
-
 }
