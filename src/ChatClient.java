@@ -290,11 +290,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
             }
         });
 
-
-
         myFilesListModel = new DefaultListModel();
-
-
         //Create the list and put it in a scroll pane.
         myFilesList= new JList(myFilesListModel);
         myFilesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -303,21 +299,13 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         myFilesList.setVisibleRowCount(5);
         myFilesList.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
-
                 JList list = (JList)evt.getSource();
                 if (evt.getClickCount() == 1) {
-
-                    // Double-click detected
                     int index = list.locationToIndex(evt.getPoint());
-
-
                     String name = (String) myFilesListModel.getElementAt(index);
                     System.out.println(name);
-
                 }
-
             }
-
         });
 
         JScrollPane myFileScrollPane = new JScrollPane(myFilesList);
@@ -463,6 +451,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                listModelSearches.removeAllElements();
                 // TODO Auto-generated method stub
                 sendMessage(new ChatMessage(ChatMessage.SEARCH, searchField.getText(), myport));
             }
@@ -487,16 +476,11 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         whisperBtn.addActionListener(new WhisperListener());
         buttonPane.add(typedText);
         //buttonPane.add(whisperBtn);
-
         OnlineUsers.add(listScrollPane, BorderLayout.CENTER);
         OnlineUsers.add(buttonPane, BorderLayout.PAGE_END);
-
         searchPanel.add(searchPane, BorderLayout.BEFORE_FIRST_LINE);
         searchPanel.add(searchfilesScrollPane,BorderLayout.CENTER);
-
         searchPanel.add(lowersearchPane, BorderLayout.AFTER_LAST_LINE);
-
-
         textArea.setEditable(false);
         textArea.setBackground(new Color(182, 208, 217));
 
@@ -520,7 +504,6 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         typedText.requestFocusInWindow();
         setVisible(true);
         this.Connect();
-
     }
 
 
@@ -565,8 +548,6 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                         String msg = s.getMessage();
                         String reqfile = msg.substring(msg.indexOf("+")+1, msg.indexOf(">"));
                         displayOnScreen(reqfile);
-
-
                         if (file != null) {
                             try {
                                 sender = new Sender(file, reqport);
@@ -626,7 +607,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                         break;
                     case ChatMessage.SEARCH_RESULT:
                         String results[] = s.getSearchResults();
-                        listModelSearches.removeAllElements();
+
                         for (int j = 0; j < results.length; j++) {
                             listModelSearches.insertElementAt(results[j], 0);
                             Thread.sleep(20);
