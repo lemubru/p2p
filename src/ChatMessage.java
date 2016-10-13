@@ -12,6 +12,8 @@ public class ChatMessage implements Serializable {
     private String searchResults[];
     private int type;
     private int port;
+    private byte[] encryptedMsg;
+
 
     ChatMessage(int type, String message, int port) {
         this.type = type;
@@ -25,10 +27,19 @@ public class ChatMessage implements Serializable {
         this.port = port;
     }
 
+
     ChatMessage(int type, String message) {
         this.type = type;
-
         this.message = message;
+    }
+    ChatMessage(int type, String message, byte[] enc) {
+        this.type = type;
+        this.encryptedMsg = enc;
+        this.message = message;
+    }
+
+    public byte[] getEncryptedMsg() {
+        return encryptedMsg;
     }
 
     ChatMessage(int type, String[] userList) {

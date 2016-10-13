@@ -12,7 +12,6 @@ public class Receiver extends Thread {
 
     private static final long serialVersionUID = 1L;
     private DatagramSocket socket = null;
-
     private ObjectInputStream sInput;
     private int ps;
     private int transMissionProtocol = 0;

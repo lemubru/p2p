@@ -17,6 +17,9 @@ public class StrongAES
             byte[] encrypted = cipher.doFinal(text.getBytes());
             System.err.println(new String(encrypted));
             // decrypt the text
+
+
+
             cipher.init(Cipher.DECRYPT_MODE, aesKey);
             String decrypted = new String(cipher.doFinal(encrypted));
             System.err.println(decrypted);

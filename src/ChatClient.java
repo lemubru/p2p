@@ -12,11 +12,21 @@
  *
  ******************************************************************************/
 import java.io.*;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.Socket;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Random;
 import java.util.Vector;
 import java.math.*;
@@ -74,10 +84,16 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     private String uploader;
     private String selectedFile;
     private boolean successConnect = false;
+    private String key;
+    private Key masterkey;
+    private String generatedKey;
     @SuppressWarnings("unchecked")
     public ChatClient() {
         this.serverIP = "lol";
         this.screenName = "";
+        key = "Bar12345Bar12345"; // 128 bit key
+        masterkey = new SecretKeySpec(key.getBytes(), "AES");
+
         JTextField hostNameField = new JTextField(5);
         JTextField portField = new JTextField(5);
         JTextField userNameField = new JTextField(5);
@@ -179,6 +195,10 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
     public int getMyport() {
         return myport;
+    }
+
+    public String getGeneratedKey() {
+        return generatedKey;
     }
 
     public String getMyIP() {
@@ -432,12 +452,53 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         downloadBtn.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
                 if (evt.getClickCount() == 1) {
-                    System.out.println("sending with TCP");
-                    //sender.start();
-                    sendMessage(new ChatMessage(ChatMessage.DOWNLOADREQUEST,"@"+uploader + " +" + selectedFile));
-                    typedText.setText("");
-                    typedText.requestFocusInWindow();
+                    try {
+                        System.out.println("sending with TCP");
 
+
+                        Random rng = new Random();
+                        //sender.staRandomrt();
+                        byte[] r = new byte[16]; //Means 2048 bit
+                        rng.nextBytes(r);
+                        generatedKey = Base64.getUrlEncoder().encodeToString(r);
+                        System.out.println("random key");
+
+
+
+
+                        displayOnScreen(generatedKey);
+
+                        String encryptthis = selectedFile+":"+generatedKey;
+
+                        Cipher cipher = Cipher.getInstance("AES");
+                        cipher.init(Cipher.ENCRYPT_MODE, masterkey);
+
+                        byte[] encrypted = cipher.doFinal(encryptthis.getBytes());
+
+
+
+
+
+                        sendMessage(new ChatMessage(ChatMessage.DOWNLOADREQUEST,"@"+uploader + " +" + "hi", encrypted));
+                        typedText.setText("");
+                        typedText.requestFocusInWindow();
+
+                    } catch (InvalidKeyException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (NoSuchAlgorithmException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (NoSuchPaddingException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (IllegalBlockSizeException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (BadPaddingException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -526,7 +587,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
 
     // listen to socket and print everything that server broadcasts
-    public void listen() throws InterruptedException {
+    public void listen() throws InterruptedException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
         ChatMessage s;
         while(true) {
 
@@ -546,8 +607,21 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                         int reqport = Integer.parseInt(s.getMessage().substring(s.getMessage().indexOf(">")+1,s.getMessage().length()));
                         System.out.println(reqport);
                         String msg = s.getMessage();
-                        String reqfile = msg.substring(msg.indexOf("+")+1, msg.indexOf(">"));
-                        displayOnScreen(reqfile);
+                        // String reqfile = msg.substring(msg.indexOf("+")+1, msg.indexOf(">"));
+
+
+
+                        byte[] enc = s.getEncryptedMsg();
+
+
+                        Cipher cipher = Cipher.getInstance("AES");
+                        cipher.init(Cipher.DECRYPT_MODE, masterkey);
+                        String totalstr = new String(cipher.doFinal(enc));
+
+                        String key = totalstr.substring(totalstr.indexOf(":")+1, totalstr.length());
+
+                        displayOnScreen(key);
+
                         if (file != null) {
                             try {
                                 sender = new Sender(file, reqport);
@@ -648,7 +722,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
     }
 
-    public static void main(String[] args) throws InterruptedException, IOException {
+    public static void main(String[] args) throws InterruptedException, IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
         ChatClient client = new ChatClient();
         client.startRxThread();
 
