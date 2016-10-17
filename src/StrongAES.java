@@ -1,4 +1,11 @@
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Key;
+import java.util.stream.Stream;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 public class StrongAES
@@ -29,10 +36,19 @@ public class StrongAES
             e.printStackTrace();
         }
     }
-    public static void main(String[] args)
+    public static void main(String[] args) throws IOException
     {
         StrongAES app = new StrongAES();
         app.run();
+
+        try(Stream<Path> paths = Files.walk(Paths.get("/home/frank/Desktop"))) {
+            paths.forEach(filePath -> {
+                if (Files.isRegularFile(filePath)) {
+                    File f = new File(filePath.toString());
+                    System.out.println(f.getName());
+                }
+            });
+        }
     }
 }
 

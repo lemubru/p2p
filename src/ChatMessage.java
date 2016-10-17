@@ -4,7 +4,7 @@ public class ChatMessage implements Serializable {
 
     static final int USERSONLINE = 0, MESSAGE = 1, ERROR = 2, SUCCESS = 3, DOWNLOADREQUEST = 4, DOWNLOADFILE = 10;
 
-    static final int SEARCH = 5, SEARCH_RESULT = 6;
+    static final int SEARCH = 5, SEARCH_RESULT = 6, CORRECTKEY = 90, UNKNOWNKEY = 444;
     protected static final long serialVersionUID = 1112122200L;
 
     private String message;

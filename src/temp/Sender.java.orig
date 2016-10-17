@@ -49,32 +49,55 @@ public class Sender extends Thread {
     private FileObj filedata;
 
     private Object lock = new Object();
+    private boolean clearToTx;
 
 
 
+    private String key;
 
-
-    public Sender(File file, int port) throws IOException {
+    public Sender(File file, int port, String key) throws IOException, ClassNotFoundException {
+        clearToTx = false;
         this.file = file;
         sendport = port;
         sourceFilePath = this.file.getAbsolutePath();
         fileName = sourceFilePath.substring(sourceFilePath.lastIndexOf("/") + 1, sourceFilePath.length());
-        filedata = new FileObj(file.getAbsolutePath(), file.length());
+        filedata = new FileObj(file.getAbsolutePath(), file.length(),key);
         TCPsocket = new Socket(hostName,port);
         sOutput = new ObjectOutputStream(TCPsocket.getOutputStream());
         sInput  = new ObjectInputStream(TCPsocket.getInputStream());
         uploadDone = false;
         this.lock = lock;
 
+        this.key = key;
 //        KeyGenerator kg = KeyGenerator.getInstance("DES");
 //		kg.init(new SecureRandom());
 //		SecretKey key = kg.generateKey();
 //		SecretKeyFactory skf = SecretKeyFactory.getInstance("DES");
 //		Class spec = Class.forName("javax.crypto.spec.DESKeySpec");
 //		DESKeySpec ks = (DESKeySpec) skf.getKeySpec(key, spec);
-        listenForMsg();
+
+
+
+        
 
     }
+
+    public boolean getClearToTx() {
+        return clearToTx;
+    }
+
+
+    public void informReceiver(String msg) {
+        try {
+            sOutput.writeObject(msg);
+        }
+        catch(IOException e) {
+            //   textArea.insert("Server has closed" + "\n", textArea.getText().length());
+            System.out.println("Exception writing to server: " + e);
+        }
+
+    }
+
 
     public String getFileName() {
         return fileName;
@@ -131,10 +154,8 @@ public class Sender extends Thread {
             int x = 0;
             //while(pauseUpload == true) {
             //   x = 3+ 3 + 3*3;
-
             // System.out.println("pause");
             if(pauseUpload) {
-
                 try {
                     synchronized (lock) {
                         lock.wait();
@@ -143,22 +164,16 @@ public class Sender extends Thread {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
-
                 /**
                  *
                 while(!Thread.currentThread().isInterrupted()) {
                     if(pauseUpload == false) {
                         Thread.currentThread().interrupt();
-
-
                     }
                 }
                  */
                 //Thread.currentThread().sleep(10);
-
             }
-
             //}
             int size = 8192;
             if(fileLength - current >= size)
@@ -179,37 +194,24 @@ public class Sender extends Thread {
     }
 
     public void createConnection() throws InterruptedException, ClassNotFoundException, IOException {
-
-        //event = createFileObj();
-
-
-        int[] transmission_data = new int[4];
-        // transmission_data[FILESIZE] = filebyteArr.length;
-        //transmission_data[PACKETSIZE] = packetsize;
-        //transmission_data[NUMPACKETS] = numpackets;
-        transmission_data[3] = transMissionProtocol;
-
         try {
-            //Connect to the receiver
-
-            /**
-             * Send receiver info about the file over TCP
-             */
-            //Output.writeObject(sourceFilePath);
             sOutput.writeObject(filedata);
-            //sOutput.writeObject(this.file.length());
+            ChatMessage response = (ChatMessage) sInput.readObject();
 
+            if(response.getType() == ChatMessage.CORRECTKEY) {
+                clearToTx = true;
+                listenForMsg();
+                txWithTCP();
+                
+            } else {
 
-            txWithTCP();
-
-
+            }
 
 
         } catch (IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
-
     }
 
 
@@ -233,7 +235,6 @@ public class Sender extends Thread {
                             synchronized (lock) {
                                 lock.notify();
                             }
-
                             pauseUpload = false;
                             showpause = false;
                         }
@@ -241,23 +242,17 @@ public class Sender extends Thread {
 
                     }
                 } catch (ClassNotFoundException | IOException e) {
-                	try {
-						TCPsocket.close();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+                    try {
+                        TCPsocket.close();
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-
             }
         };
-
         thread.start();
     }
-
-
-
-
 }

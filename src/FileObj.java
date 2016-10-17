@@ -9,11 +9,17 @@ public class FileObj  implements Serializable  {
     private String filePath;
 
     private long fileLength;
+    private String key;
 
-    public FileObj(String filep, long len) {
+    public FileObj(String filep, long len, String k) {
         filePath = filep;
         fileLength = len;
+        key = k;
 
+    }
+
+    public String getKey() {
+        return key;
     }
 
     public long getFileLength() {

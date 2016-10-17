@@ -3,19 +3,27 @@ import java.io.Serializable;
 public class FileObj  implements Serializable  {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private String filePath;
-    private int fileLength;
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    private String filePath;
 
-    public FileObj(String filep, int len) {
+    private long fileLength;
+    private String key;
+
+    public FileObj(String filep, long len, String k) {
         filePath = filep;
         fileLength = len;
+        key = k;
 
     }
+    
+    public String getKey() {
+		return key;
+	}
 
-    public int getFileLength() {
+    public long getFileLength() {
+
         return fileLength;
     }
 

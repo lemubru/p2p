@@ -32,16 +32,20 @@ public class Receiver extends Thread {
     private String destinationPathUDP = "/home/frank/Dropbox/WorkSpace_ONCLOUD/RBUDP/dest/";
     private String destinationPathTCP = "/home/frank/destTCP/";
     static boolean losspacket = false;
-    private int current = 0;
-
+    private long current = 0;
+    private String skey;
     public Receiver(String ip, int port) {
         myport = port;
         bytesRead = 0;
         fileDownloadDone = false;
     }
 
-    public int getCurrent() {
+    public long getCurrent() {
         return current;
+    }
+
+    public void setKey(String key) {
+        this.skey = key;
     }
 
 
@@ -62,45 +66,6 @@ public class Receiver extends Thread {
     public String getFileName() {
         return fileName;
     }
-
-    public void rxWithTCP2() throws IOException {
-        int TCPpacketsize = 999999999;
-        System.out.println("Receiving file...");
-
-        byte[] contents = new byte[TCPpacketsize];
-
-        //Initialize the FileOutputStream to the output file's full path.
-        fileName = sourceFilePath.substring(sourceFilePath.lastIndexOf("/") + 1, sourceFilePath.length());
-
-        FileOutputStream fos = new FileOutputStream(destinationPathTCP+fileName);
-        BufferedOutputStream bos = new BufferedOutputStream(fos);
-        InputStream is = clientSocket.getInputStream();
-
-        //No of bytes read in one read() call
-        byte [] byteArray  = new byte [999999999]; //SET THE BYTEARRAY 100 BYTES EXTRA
-        bytesRead = is.read(byteArray,0,byteArray.length);
-        current = bytesRead;
-        do {
-            bytesRead = is.read(byteArray, current, (byteArray.length-current));
-            if(bytesRead >= 0) current += bytesRead;
-            //progressBar.setValue(current);
-        } while(bytesRead > -1);
-
-        bos.write(byteArray, 0 , current);
-        bos.flush();
-        //System.out.println(current);
-        bos.close();
-        fos.close();
-        System.out.println("File saved successfully!");
-        fileDownloadDone  =true;
-
-
-    }
-
-
-
-
-
 
 
     public void rxWithTCP() throws IOException {
@@ -183,14 +148,26 @@ public class Receiver extends Thread {
             System.err.println("Created socket with client");
             sInput  = new ObjectInputStream(clientSocket.getInputStream());
             sOutput = new ObjectOutputStream(clientSocket.getOutputStream());
+
             filedata = (FileObj) sInput.readObject();
+
+
+
             sourceFilePath = filedata.getFilePath();
             fileLength = filedata.getFileLength();
-            // BigInteger in = new BigInteger(Integer.toString(fileLength));
-            //System.out.println(in);
-            //  Stopwatch timer2 = new Stopwatch();
-            fileDownloadDone = false;
-            rxWithTCP();
+
+            String key = filedata.getKey();
+            if(key.equals(skey)) {
+
+                sOutput.writeObject(new ChatMessage(ChatMessage.CORRECTKEY, "correct"));
+                // BigInteger in = new BigInteger(Integer.toString(fileLength));
+                //System.out.println(in);
+                //  Stopwatch timer2 = new Stopwatch();
+                fileDownloadDone = false;
+                rxWithTCP();
+            } else {
+                sOutput.writeObject(new ChatMessage(ChatMessage.UNKNOWNKEY, "incorrect"));
+            }
         }
 
 

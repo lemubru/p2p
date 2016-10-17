@@ -23,12 +23,16 @@ import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Random;
 import java.util.Vector;
+import java.util.stream.Stream;
 import java.math.*;
 //Hello //sdfsdf
 public class ChatClient extends JFrame implements ActionListener,ListSelectionListener  {
@@ -41,6 +45,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     static final int MINIMUM = 0;
     private JButton searchBtn;
     private JButton chooseDLFolderBtn;
+    private JButton chooseFolderBtn;
     private Vector<File> sharedFiles;
     private String[] foundItems;
     private JTextField searchField;
@@ -87,6 +92,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     private String key;
     private Key masterkey;
     private String generatedKey;
+    private JFileChooser   folderchooser;
     @SuppressWarnings("unchecked")
     public ChatClient() {
         this.serverIP = "lol";
@@ -210,9 +216,6 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
     public void showChooser() {
         JFileChooser chooser = new JFileChooser();
-        //FileNameExtensionFilter filter = new FileNameExtensionFilter(
-        //   "JPG & GIF Images", "jpg", "gif");
-        // chooser.setFileFilter(filter);
         int returnVal = chooser.showOpenDialog(this);
         if(returnVal == JFileChooser.APPROVE_OPTION) {
             System.out.println("You chose to open this file: " +
@@ -223,6 +226,22 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
         }
     }
+    public void showFolderChooser() {
+        folderchooser = new JFileChooser();
+        folderchooser.setCurrentDirectory(new java.io.File("."));
+        folderchooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        folderchooser.setAcceptAllFileFilterUsed(false);
+        if (folderchooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            System.out.println("getCurrentDirectory(): "
+                               +  folderchooser.getCurrentDirectory());
+            System.out.println("getSelectedFile() : "
+                               +  folderchooser.getSelectedFile());
+        }
+        else {
+            System.out.println("No Selection ");
+        }
+
+    }
 
     public void displayOnScreen(String s) {
         textArea.insert(s + "\n", textArea.getText().length());
@@ -230,40 +249,6 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
     }
 
-    public void startRxThread() {
-        rxThread = new Receiver(myIP, myport);
-        rxThread.start();
-
-
-        Thread adminListen = new Thread(new Runnable() {
-            public void run() {
-                int rxp = rxThread.getBytesRead();
-                while(rxThread.isAlive()) {
-                    if(!rxThread.getfileDownloadDOne()) {
-                        downloadProgLabel.setText("Download progress...");
-                        downloadbar.setMaximum(100);
-                        //if received packets changes get total packets and calculate the percentage completed
-                        // System.out.println("sdfsdff");
-                        float perc = (float) rxThread.getCurrent()  / (float) rxThread.getFileLength();
-                        int percentage = (int)Math.round(perc*100);
-                        // System.out.println(percentage);
-                        downloadbar.setValue(percentage);
-
-                        // System.out.println(rxp);
-                        // it.getFile().setText(it.getRxObject().getGetFileName());
-                        //  it.getTp().setText(""+ rounding( (((it.getRxObject().getPs()*rxp)/it.getRxObject().getTimerUDP().elapsedTime()) / 1000000), 2 ));
-                    } else {
-                        downloadbar.setValue(100);
-                        downloadProgLabel.setText("download complete! " + rxThread.getFileName());
-                    }
-                }
-            }
-        });
-        adminListen.start();
-
-
-
-    }
 
 
     public void displayGUI() {
@@ -316,14 +301,16 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         myFilesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         myFilesList.setSelectedIndex(0);
         myFilesList.addListSelectionListener((ListSelectionListener) this);
-        myFilesList.setVisibleRowCount(5);
+        myFilesList.setVisibleRowCount(10);
         myFilesList.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
                 JList list = (JList)evt.getSource();
                 if (evt.getClickCount() == 1) {
-                    int index = list.locationToIndex(evt.getPoint());
-                    String name = (String) myFilesListModel.getElementAt(index);
-                    System.out.println(name);
+                    if(!myFilesListModel.isEmpty()) {
+                        int index = list.locationToIndex(evt.getPoint());
+                        String name = (String) myFilesListModel.getElementAt(index);
+                        System.out.println(name);
+                    }
                 }
             }
         });
@@ -336,7 +323,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         searchResultlist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         searchResultlist.setSelectedIndex(0);
         searchResultlist.addListSelectionListener((ListSelectionListener) this);
-        searchResultlist.setVisibleRowCount(5);
+        searchResultlist.setVisibleRowCount(10);
         searchResultlist.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
 
@@ -344,12 +331,14 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                 if (evt.getClickCount() == 1) {
 
                     // Double-click detected
-                    int index = list.locationToIndex(evt.getPoint());
-                    String name = (String) listModelSearches.getElementAt(index);
-                    selectedFile = name.substring(0, name.lastIndexOf(":"));
-                    uploader = name.substring(name.lastIndexOf(":")+1,name.length());
-                    System.out.println(uploader);
-                    System.out.println(name);
+                    if(!listModelSearches.isEmpty()) {
+                        int index = list.locationToIndex(evt.getPoint());
+                        String name = (String) listModelSearches.getElementAt(index);
+                        selectedFile = name.substring(0, name.lastIndexOf(":"));
+                        uploader = name.substring(name.lastIndexOf(":")+1,name.length());
+                        System.out.println(uploader);
+                        System.out.println(name);
+                    }
 
                 }
             }
@@ -361,7 +350,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         OnlineUserListModel = new DefaultListModel();
 
         JPanel OnlineUsers = new JPanel(new BorderLayout());
-        OnlineUsers.setPreferredSize(new Dimension(70,80));
+        OnlineUsers.setPreferredSize(new Dimension(120,80));
         //Create the list and put it in a scroll pane.
         onlineUserList = new JList(OnlineUserListModel);
         onlineUserList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -422,17 +411,53 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
         JPanel shareFilePane = new JPanel();
         shareFilePane.setLayout(new BoxLayout(shareFilePane,BoxLayout.Y_AXIS));
+        JButton deleteFile = new JButton("Remove file");
+        JButton chooseFolder = new JButton("Choose Folder");
+        chooseFolder.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                // TODO Auto-generated method stub
+                showFolderChooser();
+                if(folderchooser != null) {
+
+                    try(Stream<Path> paths = Files.walk(Paths.get(folderchooser.getSelectedFile().toString()))) {
+                        paths.forEach(filePath -> {
+                            if (Files.isRegularFile(filePath)) {
+                                File f = new File(filePath.toString());
+                                System.out.println(f.getName());
+                                if(!sharedFiles.contains(f)) {
+                                    sharedFiles.add(f);
+                                    myFilesListModel.insertElementAt(f.getAbsolutePath(), 0);
+                                }
+                            }
+                        });
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        });
         JButton chooseFile = new JButton("Choose File");
         shareFilePane.add(new JLabel("Share your files:"));
         shareFilePane.add(chooseFile);
+        shareFilePane.add(chooseFolder);
         chooseFile.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 // TODO Auto-generated method stub
                 showChooser();
-                sharedFiles.add(file);
-                myFilesListModel.insertElementAt(file.getAbsolutePath(), 0);
+                if(file != null) {
+                	if(!sharedFiles.contains(file)) {
+                    sharedFiles.add(file);
+                    myFilesListModel.insertElementAt(file.getAbsolutePath(), 0);
+                	}
+                	}
+
+
+
             }
         });
         // shareFilePane.add(chooser);
@@ -452,53 +477,42 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         downloadBtn.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
                 if (evt.getClickCount() == 1) {
-                	try {
-                    System.out.println("sending with TCP");
+                    try {
+                        System.out.println("sending with TCP");
 
 
-                    Random rng = new Random();
-                    //sender.staRandomrt();
-                    byte[] r = new byte[16]; //Means 2048 bit
-                    rng.nextBytes(r);
-                    generatedKey = Base64.getUrlEncoder().encodeToString(r);
-                    System.out.println("random key");
-                    
-            
-                    
-                   
-                    displayOnScreen(generatedKey);	
+                        Random rng = new Random();
+                        //sender.staRandomrt();
+                        byte[] r = new byte[16]; //Means 2048 bit
+                        rng.nextBytes(r);
+                        generatedKey = Base64.getUrlEncoder().encodeToString(r);
+                        rxThread.setKey(generatedKey);
+                        System.out.println("random key");
+                        displayOnScreen(generatedKey);
+                        String encryptthis = selectedFile+":"+generatedKey;
+                        Cipher cipher = Cipher.getInstance("AES");
+                        cipher.init(Cipher.ENCRYPT_MODE, masterkey);
+                        byte[] encrypted = cipher.doFinal(encryptthis.getBytes());
+                        sendMessage(new ChatMessage(ChatMessage.DOWNLOADREQUEST,"@"+uploader + " +" + "hi", encrypted));
+                        typedText.setText("");
+                        typedText.requestFocusInWindow();
 
-                    String encryptthis = selectedFile+":"+generatedKey;
-                    
-                    Cipher cipher = Cipher.getInstance("AES");
-						cipher.init(Cipher.ENCRYPT_MODE, masterkey);
-                    
-                    byte[] encrypted = cipher.doFinal(encryptthis.getBytes());
-                
-                    
-                    
-                    
-                    
-                    sendMessage(new ChatMessage(ChatMessage.DOWNLOADREQUEST,"@"+uploader + " +" + "hi", encrypted));
-                    typedText.setText("");
-                    typedText.requestFocusInWindow();
-
-                	} catch (InvalidKeyException e) {
-                		// TODO Auto-generated catch block
-                		e.printStackTrace();
-                	} catch (NoSuchAlgorithmException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (NoSuchPaddingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalBlockSizeException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (BadPaddingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+                    } catch (InvalidKeyException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (NoSuchAlgorithmException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (NoSuchPaddingException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (IllegalBlockSizeException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (BadPaddingException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -514,7 +528,8 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
             public void actionPerformed(ActionEvent e) {
                 listModelSearches.removeAllElements();
                 // TODO Auto-generated method stub
-                sendMessage(new ChatMessage(ChatMessage.SEARCH, searchField.getText(), myport));
+                if(!searchField.getText().equals(""))
+                    sendMessage(new ChatMessage(ChatMessage.SEARCH, searchField.getText().toLowerCase(), myport));
             }
         });
 
@@ -533,8 +548,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         JPanel buttonPane = new JPanel();
         buttonPane.setLayout(new BoxLayout(buttonPane,
                                            BoxLayout.LINE_AXIS));
-        whisperBtn = new JButton("Whisper");
-        whisperBtn.addActionListener(new WhisperListener());
+
         buttonPane.add(typedText);
         //buttonPane.add(whisperBtn);
         OnlineUsers.add(listScrollPane, BorderLayout.CENTER);
@@ -559,7 +573,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         content.add(searchPanel, BorderLayout.WEST);
         this.successConnect = true;
         // display the window, with focus on typing box
-        setTitle("Chat Room: " + screenName );
+        setTitle("Peer 2 Peer: " + screenName );
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
         typedText.requestFocusInWindow();
@@ -586,6 +600,30 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     }
 
 
+
+    public void startRxThread() {
+        rxThread = new Receiver(myIP, myport);
+        rxThread.start();
+        Thread dbarThread = new Thread(new Runnable() {
+            public void run() {
+                while(rxThread.isAlive()) {
+                    if(!rxThread.getfileDownloadDOne()) {
+                        downloadProgLabel.setText("Download progress...");
+                        downloadbar.setMaximum(100);
+                        float perc = (float) rxThread.getCurrent()  / (float) rxThread.getFileLength();
+                        int percentage = (int)Math.round(perc*100);
+                        downloadbar.setValue(percentage);
+                    } else {
+                        downloadbar.setValue(100);
+                        downloadProgLabel.setText("download complete! " + rxThread.getFileName());
+                    }
+                }
+            }
+        });
+        dbarThread.start();
+    }
+
+
     // listen to socket and print everything that server broadcasts
     public void listen() throws InterruptedException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
         ChatMessage s;
@@ -607,55 +645,46 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                         int reqport = Integer.parseInt(s.getMessage().substring(s.getMessage().indexOf(">")+1,s.getMessage().length()));
                         System.out.println(reqport);
                         String msg = s.getMessage();
-                       // String reqfile = msg.substring(msg.indexOf("+")+1, msg.indexOf(">"));
-                        
-
-                        
+                        // String reqfile = msg.substring(msg.indexOf("+")+1, msg.indexOf(">"));
                         byte[] enc = s.getEncryptedMsg();
-                        
-                        
                         Cipher cipher = Cipher.getInstance("AES");
                         cipher.init(Cipher.DECRYPT_MODE, masterkey);
                         String totalstr = new String(cipher.doFinal(enc));
-                        
+
                         String key = totalstr.substring(totalstr.indexOf(":")+1, totalstr.length());
-                       
-                        displayOnScreen(key);
-                        
-                        if (file != null) {
+                        String filename = totalstr.substring(0,totalstr.indexOf(":"));
+
+                        File toup = null;
+                        for (File kth :sharedFiles) {
+                            if(filename.equals(kth.getName())) {
+                                toup = kth;
+                            }
+                        }
+
+                        displayOnScreen(key + " :" +filename);
+                        if (toup != null) {
                             try {
-                                sender = new Sender(file, reqport);
+                                sender = new Sender(toup, reqport,key);
                                 sender.start();
                                 Thread adminListen = new Thread(new Runnable() {
                                     public void run() {
                                         while(sender.isAlive()) {
                                             uploadProgLabel.setText("Upload progress...");
-
                                             uploadbar.setMaximum(100);
-                                            //if received packets changes get total packets and calculate the percentage completed
-                                            // System.out.println("sdfsdff");
                                             float perc = (float) sender.getCurrent()  / (float) sender.getFileLength();
                                             int percentage = (int)Math.round(perc*100);
-                                            // System.out.println(percentage);
                                             uploadbar.setValue(percentage);
-
-                                            // System.out.println(rxp);
-                                            // it.getFile().setText(it.getRxObject().getGetFileName());
-                                            //  it.getTp().setText(""+ rounding( (((it.getRxObject().getPs()*rxp)/it.getRxObject().getTimerUDP().elapsedTime()) / 1000000), 2 ));
-
                                         }
                                         uploadProgLabel.setText("upload complete! " + sender.getFileName());
                                     }
                                 });
                                 adminListen.start();
-
-
                             } catch (IOException e1) {
                                 // TODO Auto-generated catch block
                                 e1.printStackTrace();
                             }
                         } else {
-                            displayOnScreen("no files");
+                            displayOnScreen("No such file.");
                         }
                         break;
                     case ChatMessage.USERSONLINE:
@@ -671,7 +700,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                         foundItems = new String[sharedFiles.size()];
                         int i = 0;
                         for (File file : sharedFiles) {
-                            if (file.getName().indexOf(s.getMessage()) != -1) {
+                            if (file.getName().toLowerCase().indexOf(s.getMessage()) != -1) {
                                 foundItems[i] = file.getName() + ":"+ screenName;
                                 i++;
                             }
@@ -684,7 +713,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
                         for (int j = 0; j < results.length; j++) {
                             listModelSearches.insertElementAt(results[j], 0);
-                            Thread.sleep(20);
+                            Thread.sleep(50);
                         }
 
                         break;
@@ -730,31 +759,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         client.listen();
     }
 
-    class WhisperListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            int index = onlineUserList.getSelectedIndex();
-            String name = (String) OnlineUserListModel.getElementAt(index);
-            System.out.println(name);
-            typedText.setText("@"+name+" ");
-            typedText.requestFocusInWindow();
-            //  listModel.remove(index);
 
-            int size = OnlineUserListModel.getSize();
-
-            if (size == 0) { //Nobody's left, disable firing.
-                whisperBtn.setEnabled(false);
-
-            } else { //Select an index.
-                if (index == OnlineUserListModel.getSize()) {
-                    //removed item in last position
-                    index--;
-                }
-
-                onlineUserList.setSelectedIndex(index);
-                onlineUserList.ensureIndexIsVisible(index);
-            }
-        }
-    }
 
     @Override
     public void valueChanged(ListSelectionEvent arg0) {
