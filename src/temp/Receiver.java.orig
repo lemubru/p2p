@@ -60,7 +60,10 @@ public class Receiver extends Thread {
         return receivedPackets;
     }
 
+    public void setDLPath(String path) {
+    	destinationPathTCP = path;
 
+    }
 
 
     public String getFileName() {
@@ -164,21 +167,7 @@ public class Receiver extends Thread {
                 //System.out.println(in);
                 //  Stopwatch timer2 = new Stopwatch();
                 fileDownloadDone = false;
-                Thread dlthread = new Thread(new Runnable() {
-					
-					@Override
-					public void run() {
-						// TODO Auto-generated method stub
-						try {
-							rxWithTCP();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-					}
-				});
-                dlthread.start();
+                rxWithTCP();
             } else {
                 sOutput.writeObject(new ChatMessage(ChatMessage.UNKNOWNKEY, "incorrect"));
             }

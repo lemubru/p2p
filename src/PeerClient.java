@@ -34,13 +34,18 @@ import java.util.Random;
 import java.util.Vector;
 import java.util.stream.Stream;
 import java.math.*;
-//Hello //sdfsdf
-public class ChatClient extends JFrame implements ActionListener,ListSelectionListener  {
+
+/**
+ * This class is the gui for the client, it handles all user input. 
+ * @author frank
+ *
+ */
+public class PeerClient extends JFrame implements ActionListener,ListSelectionListener  {
 
     private static final long serialVersionUID = 1L;
     private JList<String> onlineUserList;
     private DefaultListModel<String> OnlineUserListModel;
-    private ListeningPortPrivate lpp;
+   
     static final int MAXIMUM = 100;
     static final int MINIMUM = 0;
     private JButton searchBtn;
@@ -94,7 +99,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     private String generatedKey;
     private JFileChooser   folderchooser;
     @SuppressWarnings("unchecked")
-    public ChatClient() {
+    public PeerClient() {
         this.serverIP = "lol";
         this.screenName = "";
         key = "Bar12345Bar12345"; // 128 bit key
@@ -198,14 +203,26 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
             }
         }
     }
-
+/**
+ *  returns the port of the client
+ * @return
+ */
     public int getMyport() {
         return myport;
     }
 
+    /**
+     * returns the generated key of the client.
+     * @return
+     */
     public String getGeneratedKey() {
         return generatedKey;
     }
+    
+    /**
+     * Returns the IP of the client.
+     * @return
+     */
 
     public String getMyIP() {
         return myIP;
@@ -213,7 +230,9 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
 
 
-
+/**
+ * This function shows the file chooser
+ */
     public void showChooser() {
         JFileChooser chooser = new JFileChooser();
         int returnVal = chooser.showOpenDialog(this);
@@ -226,6 +245,10 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
         }
     }
+    
+    /**
+     * This function shows the folder chooser.
+     */
     public void showFolderChooser() {
         folderchooser = new JFileChooser();
         folderchooser.setCurrentDirectory(new java.io.File("."));
@@ -243,13 +266,19 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
     }
 
+    /*
+     * 
+     * This method displays msg on screen.
+     */
     public void displayOnScreen(String s) {
         textArea.insert(s + "\n", textArea.getText().length());
         textArea.setCaretPosition(textArea.getText().length());
 
     }
 
-
+/**
+ * This function builds the client GUI.
+ */
 
     public void displayGUI() {
 
@@ -460,19 +489,10 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
 
             }
         });
-        // shareFilePane.add(chooser);
-
         shareFilePane.add(myFileScrollPane);
-
-
-
         lowerPane.add(progressPane, BorderLayout.WEST);
-        // lowerPane.add(typedText);
-        //lowerPane.add(Box.createHorizontalStrut(5));
         lowerPane.add(shareFilePane);
-
         searchPane.setLayout(new BoxLayout(searchPane,BoxLayout.LINE_AXIS));
-
         downloadBtn = new JButton("Download");
         downloadBtn.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
@@ -480,7 +500,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                     try {
                         System.out.println("sending with TCP");
 
-
+                        chooseDLFolderBtn.setEnabled(false);
                         Random rng = new Random();
                         //sender.staRandomrt();
                         byte[] r = new byte[16]; //Means 2048 bit
@@ -520,6 +540,15 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         chooseDLFolderBtn = new JButton("Choose Download Folder");
         chooseDLFolderBtn.setToolTipText("This is the folder where all the files will be downloaded to");
 
+        chooseDLFolderBtn.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO Auto-generated method stub
+                rxThread.setDLPath(chooseDLFolder().getSelectedFile().getAbsolutePath());
+            }
+        });
+
         searchBtn = new JButton("Search");
 
         searchBtn.addActionListener(new ActionListener() {
@@ -534,23 +563,15 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         });
 
         searchField = new JTextField();
-
-
         searchPane.add(searchField);
         searchPane.add(searchBtn);
         searchPane.add(downloadBtn);
         lowersearchPane.add(chooseDLFolderBtn);
-
-
         JScrollPane listScrollPane = new JScrollPane(onlineUserList);
-
-
         JPanel buttonPane = new JPanel();
         buttonPane.setLayout(new BoxLayout(buttonPane,
                                            BoxLayout.LINE_AXIS));
-
         buttonPane.add(typedText);
-        //buttonPane.add(whisperBtn);
         OnlineUsers.add(listScrollPane, BorderLayout.CENTER);
         OnlineUsers.add(buttonPane, BorderLayout.PAGE_END);
         searchPanel.add(searchPane, BorderLayout.BEFORE_FIRST_LINE);
@@ -578,16 +599,45 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         pack();
         typedText.requestFocusInWindow();
         setVisible(true);
-        this.Connect();
     }
 
+/**
+ * This function returns the folder that the client chose to download in.
+ * @return folder for download.
+ */
 
+    public JFileChooser chooseDLFolder() {
+        JFileChooser folderchooser = new JFileChooser();
+        folderchooser.setCurrentDirectory(new java.io.File("."));
+        folderchooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        folderchooser.setAcceptAllFileFilterUsed(false);
+        if (folderchooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            System.out.println("getCurrentDirectory(): "
+                               +  folderchooser.getCurrentDirectory());
+            System.out.println("getSelectedFile() : "
+                               +  folderchooser.getSelectedFile());
+            return folderchooser;
+        }
+        else {
+            System.out.println("No Selection ");
+        }
+        return null;
+
+
+    }
+    /**
+     * function handles actions on text input field.
+     */
     public void actionPerformed(ActionEvent e) {
         sendMessage(new ChatMessage(ChatMessage.MESSAGE,typedText.getText()));
         typedText.setText("");
         typedText.requestFocusInWindow();
     }
 
+    /**
+     * This function writes to the TCP socket, or the server.
+     * @param msg the chatmessage obj to send the server.
+     */
 
     void sendMessage(ChatMessage msg) {
         try {
@@ -599,7 +649,9 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         }
     }
 
-
+/**
+ * This function starts the receiving thread.
+ */
 
     public void startRxThread() {
         rxThread = new Receiver(myIP, myport);
@@ -616,6 +668,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                     } else {
                         downloadbar.setValue(100);
                         downloadProgLabel.setText("download complete! " + rxThread.getFileName());
+                        chooseDLFolderBtn.setEnabled(true);
                     }
                 }
             }
@@ -624,7 +677,15 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     }
 
 
-    // listen to socket and print everything that server broadcasts
+ /**
+  * This function listens for messages from the server.
+  * @throws InterruptedException
+  * @throws InvalidKeyException
+  * @throws NoSuchAlgorithmException
+  * @throws NoSuchPaddingException
+  * @throws IllegalBlockSizeException
+  * @throws BadPaddingException
+  */
     public void listen() throws InterruptedException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
         ChatMessage s;
         while(true) {
@@ -747,15 +808,11 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         catch(Exception e) {} // not much else I can do
         System.err.println("Closed client socket");
     }
-    public void Connect() {
-
-    }
+ 
 
     public static void main(String[] args) throws InterruptedException, IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-        ChatClient client = new ChatClient();
+        PeerClient client = new PeerClient();
         client.startRxThread();
-
-        //client.listenForPrivateCalls();
         client.listen();
     }
 

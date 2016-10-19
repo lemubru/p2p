@@ -1,5 +1,10 @@
 import java.io.*;
 
+/**
+ * This class represent a chatmessage sent between clients.
+ * @author frank
+ *
+ */
 public class ChatMessage implements Serializable {
 
     static final int USERSONLINE = 0, MESSAGE = 1, ERROR = 2, SUCCESS = 3, DOWNLOADREQUEST = 4, DOWNLOADFILE = 10;

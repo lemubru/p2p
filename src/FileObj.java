@@ -1,5 +1,10 @@
 import java.io.Serializable;
 
+/**
+ * This class represent a File with all the relevant data.
+ * @author frank
+ *
+ */
 public class FileObj  implements Serializable  {
 
     /**

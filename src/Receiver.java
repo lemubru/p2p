@@ -8,8 +8,13 @@ import java.util.Random;
 
 import java.math.*;
 
-public class Receiver extends Thread {
 
+/**
+ * 
+ * @author frank
+ * This class handles all downloads, security on the receiving side, and pausing/resuming of downloads.
+ */
+public class Receiver extends Thread {
     private static final long serialVersionUID = 1L;
     private DatagramSocket socket = null;
     private ObjectInputStream sInput;
@@ -60,14 +65,21 @@ public class Receiver extends Thread {
         return receivedPackets;
     }
 
+    public void setDLPath(String path) {
+        destinationPathTCP = path+"/";
+        System.out.println("new dl dir" + destinationPathTCP);
 
+    }
 
 
     public String getFileName() {
         return fileName;
     }
 
-
+/**
+ * This function rx with TCP.
+ * @throws IOException
+ */
     public void rxWithTCP() throws IOException {
         int TCPpacketsize = 524288;
         System.out.println("Receiving file...");
@@ -121,7 +133,10 @@ public class Receiver extends Thread {
         return ps;
     }
 
-
+/**
+ * This function sends a message to the tx'er telling him to stop or resume.
+ * @param msg
+ */
     public void informSender(String msg) {
 
         try {
@@ -134,8 +149,14 @@ public class Receiver extends Thread {
         }
 
     }
+    /**
+     * This function creates a connection between tx and rx peers.
+     * @throws InterruptedException
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
 
-    public void rxWithUDP() throws InterruptedException, IOException, ClassNotFoundException {
+    public void createConnectionNow() throws InterruptedException, IOException, ClassNotFoundException {
 
         int fileSize = 0;
         int packetSize = 0;
@@ -176,14 +197,17 @@ public class Receiver extends Thread {
 
 
 
-
+/**
+ * Get the filename thats being downloaded.
+ * @return
+ */
     public String getGetFileName() {
         return sourceFilePath.substring(sourceFilePath.lastIndexOf("/") + 1, sourceFilePath.length());
     }
 
     public void run() {
         try {
-            rxWithUDP();
+            createConnectionNow();
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

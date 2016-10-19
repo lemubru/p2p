@@ -2,6 +2,11 @@
 import java.io.*;
 import java.net.Socket;
 
+/**
+ * This class extends the Java Thread object and is created for every client that connects to the server. It has all relevant attributes for a client for example: IP address, port and username.
+ * @author frank
+ *
+ */
 public class ClientThread  extends Thread {
     private Socket socket;
     private ObjectInputStream sInput;       // to read from the socket
@@ -10,7 +15,17 @@ public class ClientThread  extends Thread {
     private String screenName;
     private int myport;
     private String myIP;
-
+/**
+ *  
+ * @param insocket socket to send to
+ * @param screenName name of client
+ * @param sInput in stream
+ * @param sOutput out stream
+ * @param ip ip of client
+ * @param port port of client
+ * @throws ClassNotFoundException
+ * @throws IOException
+ */
     public ClientThread(Socket insocket, String screenName,ObjectInputStream sInput, ObjectOutputStream sOutput, String ip, int port) throws ClassNotFoundException, IOException {
         this.screenName = screenName;
         this.sOutput = sOutput;

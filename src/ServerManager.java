@@ -2,7 +2,11 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.Vector;
-
+/**
+ * This class routes comms between clients.
+ * @author frank
+ *
+ */
 public class ServerManager extends Thread {
     private Vector<ClientThread> connections;
     private String serverMessage;
@@ -17,6 +21,9 @@ public class ServerManager extends Thread {
         serverMessage = msg;
     }
 
+    /**
+     * This function updates the list of connected clients.
+     */
     public void updateUserList() {
         String[] userList = new String[connections.size()];
         int k = 0;
@@ -35,6 +42,9 @@ public class ServerManager extends Thread {
             }
         }
     }
+    /**
+     * This function loops through the list of connected clients and routes the messages.
+     */
     public void run() {
         while (true) {
             for (int i = 0; i < connections.size(); i++) {

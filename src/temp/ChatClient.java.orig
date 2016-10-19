@@ -450,11 +450,11 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                 // TODO Auto-generated method stub
                 showChooser();
                 if(file != null) {
-                	if(!sharedFiles.contains(file)) {
-                    sharedFiles.add(file);
-                    myFilesListModel.insertElementAt(file.getAbsolutePath(), 0);
-                	}
-                	}
+                    if(!sharedFiles.contains(file)) {
+                        sharedFiles.add(file);
+                        myFilesListModel.insertElementAt(file.getAbsolutePath(), 0);
+                    }
+                }
 
 
 
@@ -480,7 +480,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                     try {
                         System.out.println("sending with TCP");
 
-
+                       chooseDLFolderBtn.setEnabled(false);
                         Random rng = new Random();
                         //sender.staRandomrt();
                         byte[] r = new byte[16]; //Means 2048 bit
@@ -520,6 +520,15 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
         chooseDLFolderBtn = new JButton("Choose Download Folder");
         chooseDLFolderBtn.setToolTipText("This is the folder where all the files will be downloaded to");
 
+        chooseDLFolderBtn.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO Auto-generated method stub
+                rxThread.setDLPath(chooseDLFolder().getSelectedFile().getAbsolutePath());
+            }
+        });
+        
         searchBtn = new JButton("Search");
 
         searchBtn.addActionListener(new ActionListener() {
@@ -582,6 +591,26 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
     }
 
 
+    
+    public JFileChooser chooseDLFolder() {
+   JFileChooser folderchooser = new JFileChooser();
+   folderchooser.setCurrentDirectory(new java.io.File("."));
+   folderchooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+   folderchooser.setAcceptAllFileFilterUsed(false);
+   if (folderchooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+       System.out.println("getCurrentDirectory(): "
+                          +  folderchooser.getCurrentDirectory());
+       System.out.println("getSelectedFile() : "
+                          +  folderchooser.getSelectedFile());
+       return folderchooser;
+   }
+   else {
+       System.out.println("No Selection ");
+   }
+   return null;
+
+
+}
     public void actionPerformed(ActionEvent e) {
         sendMessage(new ChatMessage(ChatMessage.MESSAGE,typedText.getText()));
         typedText.setText("");
@@ -616,6 +645,7 @@ public class ChatClient extends JFrame implements ActionListener,ListSelectionLi
                     } else {
                         downloadbar.setValue(100);
                         downloadProgLabel.setText("download complete! " + rxThread.getFileName());
+                        chooseDLFolderBtn.setEnabled(true);
                     }
                 }
             }

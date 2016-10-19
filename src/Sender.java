@@ -21,7 +21,11 @@ import java.security.spec.KeySpec;
 import java.security.spec.InvalidKeySpecException;
 import javax.crypto.spec.SecretKeySpec;
 
-
+/**
+ * This class handles the uploading of files and security on the sending side.  It also listen for a pause message from the receiver
+ * @author frank
+ *
+ */
 public class Sender extends Thread {
     static final int FILESIZE = 0, PACKETSIZE = 1, NUMPACKETS = 2, ALL_PACKETS_RECEIVED = 5, PACKETS_MISSING = 6, STILLSENDING = 7, SIGNAL = 8, DONE = 9,RETRANSMISSION = 10;
     static final int TCP = 3,  UDP = 4;
@@ -50,9 +54,6 @@ public class Sender extends Thread {
 
     private Object lock = new Object();
     private boolean clearToTx;
-
-
-
     private String key;
 
     public Sender(File file, int port, String key) throws IOException, ClassNotFoundException {
@@ -69,24 +70,16 @@ public class Sender extends Thread {
         this.lock = lock;
 
         this.key = key;
-//        KeyGenerator kg = KeyGenerator.getInstance("DES");
-//		kg.init(new SecureRandom());
-//		SecretKey key = kg.generateKey();
-//		SecretKeyFactory skf = SecretKeyFactory.getInstance("DES");
-//		Class spec = Class.forName("javax.crypto.spec.DESKeySpec");
-//		DESKeySpec ks = (DESKeySpec) skf.getKeySpec(key, spec);
-
-
-
-
-
     }
 
     public boolean getClearToTx() {
         return clearToTx;
     }
 
-
+/**
+ * This function sends a message to the receiver telling him that anything.
+ * @param msg
+ */
     public void informReceiver(String msg) {
         try {
             sOutput.writeObject(msg);
@@ -98,11 +91,17 @@ public class Sender extends Thread {
 
     }
 
-
+/**
+ * Get the filename that is being transmitted.
+ * @return
+ */
     public String getFileName() {
         return fileName;
     }
-
+/**
+ * Set the boolean to pause the DL.
+ * @param pauseUpload
+ */
     public void setPauseUpload(boolean pauseUpload) {
         this.pauseUpload = pauseUpload;
     }
@@ -139,6 +138,11 @@ public class Sender extends Thread {
     public boolean getUploadDone() {
         return uploadDone;
     }
+    /**
+     * This function sends the file to the receiver by write onto the stream.
+     * @throws IOException
+     * @throws InterruptedException
+     */
 
     public void txWithTCP() throws IOException, InterruptedException {
         InetAddress IA = InetAddress.getByName(hostName);
@@ -152,9 +156,6 @@ public class Sender extends Thread {
         System.out.println("txing FILE SIZE" + fileLength);
         while(current!=fileLength) {
             int x = 0;
-            //while(pauseUpload == true) {
-            //   x = 3+ 3 + 3*3;
-            // System.out.println("pause");
             if(pauseUpload) {
                 try {
                     synchronized (lock) {
@@ -164,17 +165,9 @@ public class Sender extends Thread {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                /**
-                 *
-                while(!Thread.currentThread().isInterrupted()) {
-                    if(pauseUpload == false) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
-                 */
-                //Thread.currentThread().sleep(10);
+ 
             }
-            //}
+          
             int size = 8192;
             if(fileLength - current >= size)
                 current += size;
@@ -190,8 +183,13 @@ public class Sender extends Thread {
         TCPsocket.close();
         uploadDone = true;
         System.out.println("File sent succesfully!");
-        //System.exit(0);
     }
+    /**
+     * This function creates a connection between them and ensures security.
+     * @throws InterruptedException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     */
 
     public void createConnection() throws InterruptedException, ClassNotFoundException, IOException {
         try {
@@ -215,7 +213,10 @@ public class Sender extends Thread {
     }
 
 
-
+/**
+ * This function listens for a pause/resume msg from receiver.
+ * @throws IOException
+ */
     public void listenForMsg() throws IOException {
         Thread thread = new Thread() {
 
