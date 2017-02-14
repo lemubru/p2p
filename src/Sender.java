@@ -223,10 +223,12 @@ public class Sender extends Thread {
             public void run() {
                 System.out.println("listening on private port...");
                 try {
-                    while(true) {
-
-                        String s = (String) sInput.readObject();
-                        if(s.equals("pause")) {
+                    while(!TCPsocket.isClosed()) {
+                    	String s = null;
+                    	if(TCPsocket.isConnected())
+                        s = (String) sInput.readObject();
+                        
+                    	if(s.equals("pause")) {
                             System.out.println("waiting");
                             // halt();
                             pauseUpload = true;
@@ -247,10 +249,11 @@ public class Sender extends Thread {
                         TCPsocket.close();
                     } catch (IOException e1) {
                         // TODO Auto-generated catch block
-                        e1.printStackTrace();
+                        
+                    	//e1.printStackTrace();
                     }
                     // TODO Auto-generated catch block
-                    e.printStackTrace();
+                   // e.printStackTrace();
                 }
             }
         };

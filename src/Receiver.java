@@ -66,9 +66,12 @@ public class Receiver extends Thread {
     }
 
     public void setDLPath(String path) {
-        destinationPathTCP = path+"/";
-        System.out.println("new dl dir" + destinationPathTCP);
-
+    	 if(System.getProperty("os.name").startsWith("Windows")){
+    		 destinationPathTCP = path+"\\";
+    		 System.out.println("new dl dir" + destinationPathTCP);
+    	 } else{
+    		 destinationPathTCP = path+"/";
+    	 }
     }
 
 
@@ -87,7 +90,12 @@ public class Receiver extends Thread {
         byte[] contents = new byte[TCPpacketsize];
 
         //Initialize the FileOutputStream to the output file's full path.
-        fileName = sourceFilePath.substring(sourceFilePath.lastIndexOf("/") + 1, sourceFilePath.length());
+        if(System.getProperty("os.name").startsWith("Windows")){
+        	
+        	fileName = sourceFilePath.substring(sourceFilePath.lastIndexOf("\\") + 1, sourceFilePath.length());
+        } else {
+        	fileName = sourceFilePath.substring(sourceFilePath.lastIndexOf("/") + 1, sourceFilePath.length());
+        }
 
         FileOutputStream fos = new FileOutputStream(destinationPathTCP+fileName);
         BufferedOutputStream bos = new BufferedOutputStream(fos);

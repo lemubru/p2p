@@ -5,9 +5,12 @@ JC = javac
 	$(JC) $(JFLAGS) $*.java
 
 CLASSES = \
-        ChatClient.java \
+        PeerClient.java \
         ChatRoomServer.java \
         ServerManager.java \
+		FileObj.java \
+		Receiver.java \
+		Sender.java \
         ChatMessage.java \
         ClientThread.java 
 

@@ -134,6 +134,7 @@ public class ChatRoomServer extends JFrame implements ActionListener  {
 
 
     public static void main(String[] args) {
+    	System.out.println(System.getProperty("os.name"));
         ChatRoomServer cs = new ChatRoomServer(Integer.parseInt(args[0]));
         try {
             cs.runServer();
