@@ -8,7 +8,8 @@ http://introcs.cs.princeton.edu/java/84network/
 
 ### How do I get set up? ###
 
-* run $make
+Running the following in src directory
+* run $make or $javac *.java in src directory.
 * then $java ChatRoomServer 4444
 * then in another terminal $java PeerClient
 
