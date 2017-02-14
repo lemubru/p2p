@@ -3,7 +3,7 @@
 ### What is this repository for? ###
 
 This is a repo for peer 2 peer filesharing software written in java.
-The software is based on software by Princeton University.
+The software is based on chatroom software by Princeton University.
 http://introcs.cs.princeton.edu/java/84network/
 
 ### How do I get set up? ###
