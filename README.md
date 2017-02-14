@@ -12,6 +12,7 @@ http://introcs.cs.princeton.edu/java/84network/
 * then $java ChatRoomServer 4444
 * then in another terminal $java PeerClient
 
+or Import project into Eclipse IDE and set argument 4444 for ChatRoomServer.java and run ChatRoomServer.java then run PeerClient.java for every client.
 
 ### Who do I talk to? ###
 
