@@ -8,7 +8,10 @@ http://introcs.cs.princeton.edu/java/84network/
 
 ### How do I get set up? ###
 
-run the startserver.sh script to start the server and then run a few addclient.sh scripts to add clients to the server.
+* run $make
+* then $java ChatRoomServer 4444
+* then in another terminal $java PeerClient
+
 
 ### Who do I talk to? ###
 
