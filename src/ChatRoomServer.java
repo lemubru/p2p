@@ -85,7 +85,7 @@ public class ChatRoomServer extends JFrame implements ActionListener  {
         while (true) {
             // wait for next client connection request
             //Socket clientSocket = null;
-
+        	try{
             Socket clientSocket = serverSocket.accept();
 
 
@@ -98,17 +98,14 @@ public class ChatRoomServer extends JFrame implements ActionListener  {
             String clientIP;
             String clientport;
             String clientuser;
-            try {
+            
                 s = (String) sInput.readObject();
                 clientIP = s.substring(s.indexOf("+")+1, s.indexOf(":"));
                 clientport = s.substring(s.indexOf(":")+1, s.length());
                 clientuser = s.substring(0, s.indexOf("+"));
 
                 System.out.println(clientuser + " has connected IP , port:" +clientIP + ":"  + clientport);
-            }
-            catch(IOException e) {
-                break;
-            }
+        
             boolean usertaken = false;
             for (ClientThread jth : connections) {
 
@@ -126,6 +123,10 @@ public class ChatRoomServer extends JFrame implements ActionListener  {
                 connections.add(connection);
                 connection.start();
             }
+            
+        } catch (ClassNotFoundException | IOException e) {
+         
+        }
         }
     }
     public void closeServer() {
