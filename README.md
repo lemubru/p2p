@@ -1,4 +1,4 @@
-# Peer to Peer client for Java  #
+# Peer to Peer client written in Java  #
 
 ### What is this repository for? ###
 
