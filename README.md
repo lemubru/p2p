@@ -1,10 +1,8 @@
 Peer to Peer client for Java based on Chatroom software by Princeton University
+# Peer to Peer client for Java based on Chatroom software by Princeton University #
 
 ### What is this repository for? ###
 
-
-
-.**# Your title here... #
 
 ### How do I get set up? ###
 
