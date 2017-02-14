@@ -96,6 +96,7 @@ public class PeerClient extends JFrame implements ActionListener,ListSelectionLi
     private boolean successConnect = false;
     private String key;
     private Key masterkey;
+    //
     private String generatedKey;
     private JFileChooser   folderchooser;
     @SuppressWarnings("unchecked")
